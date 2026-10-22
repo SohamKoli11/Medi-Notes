@@ -126,6 +126,22 @@
   .followup-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
   .followup-row:last-child{border-bottom:0}.followup-name{font-weight:600;font-size:12px}.followup-date{font-size:11px;color:var(--muted);margin-top:2px}
   .future-card{padding:14px 16px;border:1px dashed var(--border);background:#fbfcfd;border-radius:var(--radius);display:flex;gap:12px;align-items:flex-start}
+  .treatment-list{display:grid;gap:12px}
+  .treatment-card{border:1px solid var(--border);border-radius:9px;padding:11px 12px}
+  .treatment-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .treatment-name{font-weight:700;font-size:13px;overflow-wrap:anywhere}
+  .treatment-meta{font-size:11px;color:var(--muted);margin-top:3px}
+  .progress-track{height:7px;background:var(--surface-3);border-radius:999px;overflow:hidden;margin-top:10px}
+  .progress-fill{height:100%;background:var(--accent);border-radius:999px;transition:width .2s}
+  .progress-fill.complete{background:var(--green)}
+  .treatment-status{font-size:10px;font-weight:700;padding:3px 7px;border-radius:999px;background:var(--blue-bg);color:var(--blue);white-space:nowrap}
+  .treatment-status.complete{background:var(--green-bg);color:var(--green)}
+  .followup-row .followup-edit{flex-shrink:0}
+  .tutorial-step-count{font-size:11px;color:var(--muted);font-weight:600}
+  .tutorial-content{min-height:105px}
+  .tour-highlight{position:relative;z-index:30;outline:3px solid var(--accent)!important;outline-offset:4px!important;box-shadow:0 0 0 6px rgba(9,105,218,.13)!important}
+  #tutorialBtn{transition:opacity .9s ease,transform .9s ease,max-width .9s ease,padding .9s ease,margin .9s ease;max-width:180px;overflow:hidden}
+  #tutorialBtn.tutorial-fading{opacity:0;transform:translateY(-5px);pointer-events:none;max-width:0;padding-left:0;padding-right:0;margin-left:-4px;margin-right:-4px;border-width:0}
   .future-icon{width:33px;height:33px;border-radius:8px;background:#eef2f6;display:grid;place-items:center;font-size:17px;flex-shrink:0}
   .future-card h3{font-size:13px;margin-bottom:3px}.future-card p{font-size:11px;color:var(--muted);margin:0}
   .footer-note{text-align:center;color:var(--muted);font-size:11px;padding:22px 0 4px}
@@ -167,6 +183,7 @@
   </div>
   <div class="top-actions">
     <button class="btn" id="exportBtn" title="Download a backup of your data">↧ Export backup</button>
+    <button class="btn" id="tutorialBtn" title="Take a quick guided tour">ⓘ Tutorial</button>
     <button class="btn" id="addDoctorBtn">＋ Add doctor</button>
     <button class="btn btn-primary" id="addMedicineBtn">＋ Add medicine</button>
   </div>
@@ -198,13 +215,13 @@
   </div>
   <section class="panel calendar-panel" aria-labelledby="calendarHeading">
     <div class="panel-header">
-      <div><div class="section-title"><h2 id="calendarHeading">Adherence calendar</h2></div><p>Choose any date to review or update its scheduled doses.</p></div>
+      <div><div class="section-title"><h2 id="calendarHeading">Adherence calendar</h2></div><p>Explore your medication adherence history by date.</p></div>
       <div class="calendar-header-actions"><button class="btn btn-small" id="deviceCalendarBtn" title="Download upcoming doses and follow-ups as an .ics file for your device calendar">↗ Device calendar</button><button class="icon-btn" id="prevYearBtn" aria-label="Previous year">‹</button><span class="year-label" id="calendarYear"></span><button class="icon-btn" id="nextYearBtn" aria-label="Next year">›</button></div>
     </div>
     <div class="calendar-body">
       <div class="heatmap-wrap"><div class="heatmap" id="heatmap" role="group" aria-label="Daily medication adherence calendar"></div></div>
       <div class="calendar-legend">
-        <span id="calendarRangeNote">Select a square to see its doses.</span>
+        <span id="calendarRangeNote">Select a square to explore a date.</span>
         <div class="legend-items">
           <span class="legend-item"><span class="legend-swatch" style="background:#ebedf0"></span>No scheduled doses</span>
           <span class="legend-item"><span class="legend-swatch" style="background:#40c463"></span>Complete</span>
@@ -217,17 +234,12 @@
     </div>
   </section>
   <div class="bottom-grid">
-    <section class="panel" aria-labelledby="selectedScheduleHeading">
-      <div class="panel-header"><div><h2 id="selectedScheduleHeading">Scheduled doses</h2><p>Review or update doses for the selected calendar date.</p></div><button class="btn btn-small" id="jumpSelectedTodayBtn">Today ↗</button></div>
-      <div class="panel-body">
-        <div class="calendar-detail">
-          <div class="calendar-detail-header"><div><div class="calendar-detail-title" id="selectedDateTitle">Selected day</div><div class="tiny muted" id="selectedDateSubtitle">Scheduled doses for this day</div></div><span class="date-status" id="selectedDateStatus">No doses</span></div>
-          <div id="selectedDateTracker"></div>
-        </div>
-      </div>
+    <section class="panel" aria-labelledby="treatmentProgressHeading">
+      <div class="panel-header"><div><h2 id="treatmentProgressHeading">Treatment progress</h2><p>Track course duration and see what's ongoing or ending soon.</p></div></div>
+      <div class="panel-body"><div id="treatmentProgressList" class="treatment-list"></div></div>
     </section>
     <section class="panel" aria-labelledby="followupHeading">
-      <div class="panel-header"><div><h2 id="followupHeading">Doctor follow-ups</h2><p>Appointments you've added to a doctor's profile.</p></div><button class="btn btn-small" id="manageFollowupsBtn">Manage doctors</button></div>
+      <div class="panel-header"><div><h2 id="followupHeading">Doctor follow-ups</h2><p>Set or update each doctor's next follow-up date.</p></div><button class="btn btn-small" id="manageFollowupsBtn">Manage doctors</button></div>
       <div class="panel-body" id="followupList"></div>
     </section>
   </div>
@@ -237,6 +249,8 @@
 <dialog id="formDialog" aria-labelledby="formTitle"><form id="mainForm"><div class="dialog-head"><h2 id="formTitle">Add item</h2><button class="icon-btn" type="button" data-close-dialog aria-label="Close">×</button></div><div class="dialog-content" id="formContent"></div><div class="dialog-footer"><span class="tiny muted">Fields marked * are required.</span><div style="display:flex;gap:7px"><button type="button" class="btn" data-close-dialog>Cancel</button><button type="submit" class="btn btn-primary" id="formSubmitBtn">Save</button></div></div></form></dialog>
 <dialog id="infoDialog"><div class="dialog-head"><h2 id="infoTitle">Medicine details</h2><button class="icon-btn" type="button" data-close-dialog aria-label="Close">×</button></div><div class="dialog-content" id="infoContent"></div><div class="dialog-footer"><span class="tiny muted">AI explanations are not connected yet.</span><button class="btn" type="button" data-close-dialog>Close</button></div></dialog>
 <dialog id="reminderDialog"><div class="dialog-head"><div><h2>💊 Your pending meds</h2><div class="tiny muted" style="margin-top:3px">These scheduled doses are 2+ hours overdue.</div></div><button class="icon-btn" type="button" data-close-reminder aria-label="Close">×</button></div><div class="dialog-content"><div id="reminderList" class="reminder-list"></div><p class="tiny muted" style="margin:12px 0 0">Check your prescription instructions before taking a dose late or making up a missed dose.</p></div><div class="dialog-footer"><span class="tiny muted">Reminder only — not medical advice.</span><button class="btn" type="button" data-close-reminder>Not now</button></div></dialog>
+<dialog id="followupDialog" aria-labelledby="followupDialogTitle"><form id="followupForm"><div class="dialog-head"><h2 id="followupDialogTitle">Update follow-up</h2><button class="icon-btn" type="button" data-close-dialog aria-label="Close">×</button></div><div class="dialog-content"><p class="muted small" id="followupDoctorLabel"></p><div class="field"><label for="followupDateInput">Next follow-up date</label><input id="followupDateInput" name="followUpDate" type="date"><small>Leave blank to keep this doctor marked as “No follow-up”.</small></div><div class="form-error" id="followupFormError"></div></div><div class="dialog-footer"><button type="button" class="btn btn-danger" id="clearFollowupBtn">Clear date</button><div style="display:flex;gap:7px"><button type="button" class="btn" data-close-dialog>Cancel</button><button type="submit" class="btn btn-primary">Save follow-up</button></div></div></form></dialog>
+<dialog id="tutorialDialog" aria-labelledby="tutorialTitle"><div class="dialog-head"><div><h2 id="tutorialTitle">Welcome to Medi-Notes</h2><div class="tutorial-step-count" id="tutorialStepCount">Step 1 of 6</div></div><button class="icon-btn" type="button" id="closeTutorialBtn" aria-label="Close tutorial">×</button></div><div class="dialog-content tutorial-content"><h3 id="tutorialStepHeading">Your dashboard</h3><p id="tutorialStepText" style="margin:9px 0 0"></p></div><div class="dialog-footer"><button type="button" class="btn" id="tutorialBackBtn">← Back</button><div style="display:flex;gap:7px"><button type="button" class="btn" id="tutorialSkipBtn">Skip tour</button><button type="button" class="btn btn-primary" id="tutorialNextBtn">Next →</button></div></div></dialog>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 (() => {
@@ -275,6 +289,9 @@
   let editing = null;
   let reminderShownThisSession = false;
   let toastTimer;
+  let followupEditingDoctorId = null;
+  let tutorialStep = 0;
+  let tutorialTimer = null;
 
   function freshState(){ return {doctors:[],medicines:[],logs:{}}; }
   function setSaveStatus(message, failed=false){
@@ -425,12 +442,6 @@
     root.innerHTML=state.doctors.map((doc,index)=>{
       const meds=state.medicines.filter(m=>m.doctorId===doc.id);
       const initials=doc.name.trim().split(/\s+/).slice(0,2).map(s=>s[0]?.toUpperCase()||'').join('');
-      let follow='';
-      if(doc.followUpDate){
-        const d=diffDays(doc.followUpDate,todayKey());
-        const ftext=d<0?`Follow-up date passed ${Math.abs(d)} day${Math.abs(d)===1?'':'s'} ago`:d===0?'Follow-up today':`Follow-up in ${d} day${d===1?'':'s'}`;
-        follow=`<div class="followup-line">▦ ${ftext} · <strong>${escapeHTML(formatDate(doc.followUpDate,{month:'short',day:'numeric',year:'numeric'}))}</strong></div>`;
-      }
       const medsHtml=meds.length?meds.map(med=>{
         const end=medicineEndDate(med);
         return `<div class="medicine-row">
@@ -447,7 +458,7 @@
         </div>`;
       }).join(''):`<div class="empty-state" style="margin:12px 0;padding:17px"><strong>No medicines added yet</strong><p>Add a medicine to start tracking its schedule.</p><button class="btn btn-small" data-action="add-med-for-doctor" data-id="${escapeHTML(doc.id)}">＋ Add medicine</button></div>`;
       return `<article class="doctor-card">
-        <div class="doctor-head"><div style="min-width:0"><div class="doctor-name-wrap"><div class="doctor-avatar">${escapeHTML(initials||'MD')}</div><div style="min-width:0"><div class="doctor-name">${escapeHTML(doc.name)}</div><div class="doctor-meta">${escapeHTML(doc.specialty||'Doctor / specialist not specified')} · ${meds.length} ${meds.length===1?'medicine':'medicines'}</div>${follow}</div></div></div>
+        <div class="doctor-head"><div style="min-width:0"><div class="doctor-name-wrap"><div class="doctor-avatar">${escapeHTML(initials||'MD')}</div><div style="min-width:0"><div class="doctor-name">${escapeHTML(doc.name)}</div><div class="doctor-meta">${escapeHTML(doc.specialty||'Doctor / specialist not specified')} · ${meds.length} ${meds.length===1?'medicine':'medicines'}</div></div></div></div>
           <div class="doctor-head-actions"><button class="btn btn-small" data-action="add-med-for-doctor" data-id="${escapeHTML(doc.id)}">＋ Medicine</button><button class="icon-btn" data-action="edit-doctor" data-id="${escapeHTML(doc.id)}" title="Edit doctor" aria-label="Edit doctor ${escapeHTML(doc.name)}">✎</button><button class="icon-btn" data-action="delete-doctor" data-id="${escapeHTML(doc.id)}" title="Delete doctor and medicines" aria-label="Delete doctor ${escapeHTML(doc.name)}">×</button></div>
         </div><div class="medicine-list">${medsHtml}</div>
       </article>`;
@@ -456,7 +467,7 @@
   function renderTracker(container, day){
     const doses=getScheduledDoses(day);
     if(!doses.length){
-      container.innerHTML=`<div class="empty-state"><div class="empty-icon">☑</div><strong>No medicines scheduled</strong><p>${day===todayKey()?'Add a medicine and choose its schedule to see doses here.':'There are no active medicine schedules for this date.'}</p>${state.doctors.length?`<button class="btn btn-small" data-action="add-med">＋ Add medicine</button>`:`<button class="btn btn-small" data-action="add-doctor">＋ Add doctor</button>`}</div>`;
+      container.innerHTML=`<div class="empty-state"><div class="empty-icon">☑</div><strong>No medicines scheduled</strong><p>${day===todayKey()?'Add medicines in the Doctors & medicines section to see their checkboxes here.':'There are no active medicine schedules for this date.'}</p></div>`;
       return {total:0,taken:0};
     }
     const doctorOrder=[];
@@ -507,28 +518,99 @@
       html+='</div>';
     }
     root.innerHTML=html;
-    document.getElementById('calendarRangeNote').textContent=`${calendarYear} · Click a day to review doses. Days without scheduled medicines stay neutral.`;
     const status=getDayStatus(selectedDate);
-    document.getElementById('selectedDateTitle').textContent=formatDate(selectedDate,{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-    document.getElementById('selectedDateSubtitle').textContent=`${status.total} scheduled dose${status.total===1?'':'s'} · ${status.taken} checked off${status.missed?` · ${status.missed} overdue/missed`:''}${status.unbought?` · ${status.unbought} need purchase`:''}`;
-    const badge=document.getElementById('selectedDateStatus'); badge.textContent=status.label;badge.className=`date-status ${status.level==='green'?'green':status.level==='orange'?'orange':status.level==='red'?'red':status.level==='supply'?'supply':''}`;
-    renderTracker(document.getElementById('selectedDateTracker'),selectedDate);
+    document.getElementById('calendarRangeNote').textContent=`${formatDate(selectedDate,{weekday:'short',month:'short',day:'numeric'})}: ${status.label}. Click another day to explore its adherence status.`;
   }
   function renderFollowups(){
     const root=document.getElementById('followupList');
-    const list=state.doctors.filter(d=>d.followUpDate).sort((a,b)=>a.followUpDate.localeCompare(b.followUpDate));
-    if(!list.length){root.innerHTML=`<div class="empty-state" style="padding:17px"><strong>No follow-ups scheduled</strong><p>Add a follow-up date while adding or editing a doctor.</p><button class="btn btn-small" data-action="add-doctor">＋ Add doctor</button></div>`;return;}
+    if(!state.doctors.length){root.innerHTML=`<div class="empty-state" style="padding:17px"><strong>No doctors added yet</strong><p>Add doctors in the Doctors & medicines section. Their follow-up status will appear here.</p></div>`;return;}
+    const list=[...state.doctors].sort((a,b)=>a.name.localeCompare(b.name));
     root.innerHTML=list.map(doc=>{
-      const delta=diffDays(doc.followUpDate,todayKey()); const status=delta<0?`${Math.abs(delta)} day${Math.abs(delta)===1?'':'s'} ago`:delta===0?'Today':`In ${delta} day${delta===1?'':'s'}`;
-      return `<div class="followup-row"><div><div class="followup-name">${escapeHTML(doc.name)}</div><div class="followup-date">${escapeHTML(formatDate(doc.followUpDate,{weekday:'short',month:'short',day:'numeric',year:'numeric'}))} · ${escapeHTML(status)}</div></div><button class="btn btn-small" data-action="edit-doctor" data-id="${escapeHTML(doc.id)}">Edit</button></div>`;
+      let status='No follow-up';
+      if(doc.followUpDate){
+        const delta=diffDays(doc.followUpDate,todayKey());
+        const relative=delta<0?`${Math.abs(delta)} day${Math.abs(delta)===1?'':'s'} ago`:delta===0?'Today':`In ${delta} day${delta===1?'':'s'}`;
+        status=`${formatDate(doc.followUpDate,{weekday:'short',month:'short',day:'numeric',year:'numeric'})} · ${relative}`;
+      }
+      return `<div class="followup-row"><div><div class="followup-name">${escapeHTML(doc.name)}</div><div class="followup-date">${escapeHTML(status)}</div></div><button class="icon-btn followup-edit" data-action="edit-followup" data-id="${escapeHTML(doc.id)}" title="Edit follow-up for ${escapeHTML(doc.name)}" aria-label="Edit follow-up for ${escapeHTML(doc.name)}">✎</button></div>`;
     }).join('');
+  }
+  function renderTreatmentProgress(){
+    const root=document.getElementById('treatmentProgressList');
+    const meds=[...state.medicines].sort((a,b)=>a.name.localeCompare(b.name));
+    if(!meds.length){root.innerHTML=`<div class="empty-state"><div class="empty-icon">▤</div><strong>No treatments yet</strong><p>Add medicines in Doctors & medicines to track their course duration here.</p></div>`;return;}
+    const today=todayKey();
+    root.innerHTML=meds.map(med=>{
+      const doctor=getDoctor(med.doctorId); const end=medicineEndDate(med);
+      const started=med.startDate<=today; const ended=!!end&&end<today;
+      const elapsed=started?Math.max(0,diffDays(today,med.startDate)+1):0;
+      const total=Number(med.durationDays)||0;
+      const pct=total?Math.max(0,Math.min(100,Math.round((elapsed/total)*100))):0;
+      let statusText='Ongoing'; let detail=`Started ${formatDate(med.startDate,{month:'short',day:'numeric',year:'numeric'})}`; let statusClass='';
+      if(!started){statusText='Not started';detail=`Starts ${formatDate(med.startDate,{month:'short',day:'numeric',year:'numeric'})}`;}
+      else if(ended){statusText='Course ended';detail=`Ended ${formatDate(end,{month:'short',day:'numeric',year:'numeric'})}`;statusClass='complete';}
+      else if(end){const remaining=Math.max(0,diffDays(end,today));statusText=remaining===0?'Ends today':`${remaining} day${remaining===1?'':'s'} left`;detail=`Day ${Math.min(elapsed,total)} of ${total} · ends ${formatDate(end,{month:'short',day:'numeric',year:'numeric'})}`;if(remaining===0)statusClass='complete';}
+      else {detail=`Started ${formatDate(med.startDate,{month:'short',day:'numeric',year:'numeric'})} · no end date set`;}
+      const progressWidth=total?pct:(started&&!ended?100:0);
+      return `<article class="treatment-card"><div class="treatment-top"><div><div class="treatment-name">${escapeHTML(med.name)}</div><div class="treatment-meta">${escapeHTML(doctor?.name||'Doctor not found')} · ${escapeHTML(detail)}</div></div><span class="treatment-status ${statusClass}">${escapeHTML(statusText)}</span></div>${total?`<div class="progress-track" role="progressbar" aria-label="${escapeHTML(med.name)} course progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><div class="progress-fill ${ended?'complete':''}" style="width:${ended?100:pct}%"></div></div>`:''}<div class="treatment-meta">${escapeHTML(frequencyText(med))}${med.purchased===false?' · Need to buy':''}</div></article>`;
+    }).join('');
+  }
+  function openFollowupEditor(doctorId){
+    const doc=getDoctor(doctorId);if(!doc)return;
+    followupEditingDoctorId=doctorId;
+    document.getElementById('followupDoctorLabel').textContent=doc.name;
+    document.getElementById('followupDateInput').value=doc.followUpDate||'';
+    document.getElementById('followupFormError').textContent='';
+    openDialog(document.getElementById('followupDialog'));
+  }
+  function saveFollowup(event){
+    event.preventDefault();const doc=getDoctor(followupEditingDoctorId);if(!doc)return;
+    const value=String(new FormData(event.currentTarget).get('followUpDate')||'');
+    if(value && !/^\d{4}-\d{2}-\d{2}$/.test(value)){document.getElementById('followupFormError').textContent='Choose a valid date.';return;}
+    doc.followUpDate=value;const saved=persist();closeDialogs();renderApp();showToast(saved?(value?'Follow-up updated':'Follow-up cleared'):'Follow-up changed, but the local save failed.');followupEditingDoctorId=null;
+  }
+  function clearFollowup(){
+    const doc=getDoctor(followupEditingDoctorId);if(!doc)return;
+    doc.followUpDate='';const saved=persist();closeDialogs();renderApp();showToast(saved?'Follow-up cleared':'Follow-up cleared for this session, but the local save failed.');followupEditingDoctorId=null;
+  }
+  const tutorialSteps=[
+    {target:'.topbar',heading:'Your controls',text:'Use Export backup to save a copy of your records. The Tutorial button opens this guide. Your records stay in this browser and are not synced online.'},
+    {target:'#summaryGrid',heading:'Quick overview',text:'These summary cards show your doctors, medicines scheduled for today, and the next follow-up based on the information you have entered.'},
+    {target:'#todayHeading',heading:'Today’s doses',text:'This is your daily checklist. Add medicines under Doctors & medicines; their scheduled dose checkboxes will appear here automatically.'},
+    {target:'#doctorsHeading',heading:'Doctors & medicines',text:'Add each prescribing doctor, then add their medicines and enter the instructions, times, meal relationship, recurrence, and course duration from the prescription.'},
+    {target:'#calendarHeading',heading:'Adherence calendar',text:'The contribution-style calendar summarizes daily adherence. Select a square to highlight a date and inspect its adherence status in the calendar note.'},
+    {target:'#treatmentProgressHeading',heading:'Treatment progress',text:'Review each medicine’s course duration, end date, days remaining, and whether a course has ended. Ongoing medicines without an end date are shown separately.'},
+    {target:'#followupHeading',heading:'Doctor follow-ups',text:'Every doctor appears here. Use the pencil icon to set or update a follow-up date; leave it blank to show “No follow-up”.'},
+    {target:'#exportBtn',heading:'Back up your data',text:'Export a backup regularly. Browser data can be lost if browser storage is cleared or the browser profile becomes unavailable. Import backup restores your saved records.'}
+  ];
+  function clearTourHighlight(){document.querySelectorAll('.tour-highlight').forEach(el=>el.classList.remove('tour-highlight'));}
+  function renderTutorialStep(){
+    clearTourHighlight();const step=tutorialSteps[tutorialStep];if(!step)return;
+    const target=document.querySelector(step.target);if(target){target.scrollIntoView({behavior:'smooth',block:'center'});target.classList.add('tour-highlight');}
+    document.getElementById('tutorialStepCount').textContent=`Step ${tutorialStep+1} of ${tutorialSteps.length}`;
+    document.getElementById('tutorialStepHeading').textContent=step.heading;
+    document.getElementById('tutorialStepText').textContent=step.text;
+    document.getElementById('tutorialBackBtn').disabled=tutorialStep===0;
+    document.getElementById('tutorialNextBtn').textContent=tutorialStep===tutorialSteps.length-1?'Finish ✓':'Next →';
+  }
+  function startTutorial(){
+    tutorialStep=0;renderTutorialStep();openDialog(document.getElementById('tutorialDialog'));
+  }
+  function closeTutorial(){
+    const dialog=document.getElementById('tutorialDialog');if(dialog.open)dialog.close();clearTourHighlight();
+  }
+  function moveTutorial(direction){
+    const next=tutorialStep+direction;
+    if(next<0)return;
+    if(next>=tutorialSteps.length){closeTutorial();return;}
+    tutorialStep=next;renderTutorialStep();
   }
   function renderApp(){
     renderSummary();renderDoctors();
     document.getElementById('todaySubtitle').textContent=formatDate(todayKey(),{weekday:'long',month:'short',day:'numeric'});
     const tally=renderTracker(document.getElementById('todayTracker'),todayKey());
     document.getElementById('todayProgress').textContent=`${tally.taken} / ${tally.total} checked`;
-    renderHeatmap();renderFollowups();
+    renderHeatmap();renderTreatmentProgress();renderFollowups();
     // Keep the app's local-only persistence architecture. A future scanner may parse a prescription
     // image/PDF and pre-fill the same medicine form; it must not silently save unverified OCR output.
     // Future: connect the medicine info icon to an AI-assisted purpose explainer with safety citations.
@@ -540,7 +622,6 @@
     document.getElementById('formContent').innerHTML=`<div class="form-grid">
       <div class="field full"><label for="doctorName">Doctor's name *</label><input id="doctorName" name="name" required maxlength="100" placeholder="e.g. Dr. A. Sharma" value="${escapeHTML(doc?.name||'')}"></div>
       <div class="field"><label for="doctorSpecialty">Specialty / department</label><input id="doctorSpecialty" name="specialty" list="doctorSpecialtyPresets" maxlength="100" placeholder="Choose or type a specialty" value="${escapeHTML(doc?.specialty||'')}"><datalist id="doctorSpecialtyPresets">${SPECIALTY_PRESETS.map(v=>`<option value="${escapeHTML(v)}"></option>`).join('')}</datalist></div>
-      <div class="field"><label for="doctorFollowup">Follow-up date</label><input id="doctorFollowup" name="followUpDate" type="date" value="${escapeHTML(doc?.followUpDate||'')}"><small>Set or update the next visit.</small></div>
       <div class="field full"><label for="doctorNotes">Notes</label><textarea id="doctorNotes" name="notes" maxlength="1000" placeholder="Optional appointment or prescription notes">${escapeHTML(doc?.notes||'')}</textarea></div>
     </div><div class="form-error" id="formError"></div>`;
     openDialog(document.getElementById('formDialog'));
@@ -583,8 +664,8 @@
     const form=event.currentTarget;const fd=new FormData(form);const error=document.getElementById('formError');
     if(editing.type==='doctor'){
       const name=String(fd.get('name')||'').trim();if(!name){error.textContent='Enter a doctor name.';return;}
-      const values={name,specialty:String(fd.get('specialty')||'').trim(),followUpDate:String(fd.get('followUpDate')||''),notes:String(fd.get('notes')||'').trim()};
-      if(editing.id)Object.assign(getDoctor(editing.id),values);else state.doctors.push({id:uid(),...values});
+      const values={name,specialty:String(fd.get('specialty')||'').trim(),notes:String(fd.get('notes')||'').trim()};
+      if(editing.id)Object.assign(getDoctor(editing.id),values);else state.doctors.push({id:uid(),followUpDate:'',...values});
       const saved=persist();closeDialogs();renderApp();showToast(saved?(editing.id?'Doctor updated':'Doctor added'):'Doctor changes are visible, but the local save failed.');editing=null;return;
     }
     if(editing.type==='medicine'){
@@ -713,6 +794,7 @@
     else if(action==='add-med')openMedicineForm();
     else if(action==='add-med-for-doctor')openMedicineForm(null,id);
     else if(action==='edit-doctor')openDoctorForm(id);
+    else if(action==='edit-followup')openFollowupEditor(id);
     else if(action==='edit-med')openMedicineForm(id);
     else if(action==='delete-doctor')deleteDoctor(id);
     else if(action==='delete-med')deleteMedicine(id);
@@ -733,12 +815,21 @@
   document.getElementById('panelAddDoctorBtn').addEventListener('click',()=>openDoctorForm());
   document.getElementById('addMedicineBtn').addEventListener('click',()=>openMedicineForm());
   document.getElementById('jumpTodayBtn').addEventListener('click',()=>selectDate(todayKey()));
-  document.getElementById('jumpSelectedTodayBtn').addEventListener('click',()=>selectDate(todayKey()));
   document.getElementById('deviceCalendarBtn').addEventListener('click',exportDeviceCalendar);
   document.getElementById('prevYearBtn').addEventListener('click',()=>{calendarYear--;selectedDate=`${calendarYear}-01-01`;renderApp();});
   document.getElementById('nextYearBtn').addEventListener('click',()=>{calendarYear++;selectedDate=`${calendarYear}-01-01`;renderApp();});
   document.getElementById('manageFollowupsBtn').addEventListener('click',()=>document.getElementById('doctorsHeading').scrollIntoView({behavior:'smooth',block:'start'}));
   document.getElementById('exportBtn').addEventListener('click',makeBackup);
+  document.getElementById('tutorialBtn').addEventListener('click',startTutorial);
+  document.getElementById('followupForm').addEventListener('submit',saveFollowup);
+  document.getElementById('clearFollowupBtn').addEventListener('click',clearFollowup);
+  document.getElementById('tutorialBackBtn').addEventListener('click',()=>moveTutorial(-1));
+  document.getElementById('tutorialNextBtn').addEventListener('click',()=>moveTutorial(1));
+  document.getElementById('tutorialSkipBtn').addEventListener('click',closeTutorial);
+  document.getElementById('closeTutorialBtn').addEventListener('click',closeTutorial);
+  document.getElementById('tutorialDialog').addEventListener('close',clearTourHighlight);
+  // Keep the tutorial button available briefly on first load, then fade it away as requested.
+  tutorialTimer=setTimeout(()=>document.getElementById('tutorialBtn').classList.add('tutorial-fading'),10000);
   document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
   document.getElementById('importFile').addEventListener('change',event=>{const file=event.target.files?.[0];if(file)importBackup(file);event.target.value='';});
   document.getElementById('resetBtn').addEventListener('click',()=>{if(confirm('Clear all Medi-Notes data saved in this browser? Export a backup first if you want to keep it.')){state=freshState();const saved=persist();try{localStorage.removeItem(LEGACY_STORAGE_KEY);}catch{}renderApp();showToast(saved?'Local data cleared':'The page was cleared, but browser storage could not be updated.');}});
