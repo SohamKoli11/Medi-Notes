@@ -250,6 +250,25 @@
   ];
   const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const FULL_WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  // Suggestions only: the field remains free-text so niche or unlisted specialties can be entered.
+  const SPECIALTY_PRESETS = [
+    'Allergy & Immunology','Anaesthesiology','Audiology','Ayurveda','Bariatric Medicine','Cardiac Surgery',
+    'Cardiology','Cardiothoracic Surgery','Child & Adolescent Psychiatry','Clinical Genetics','Clinical Hematology',
+    'Clinical Immunology','Clinical Pharmacology','Community Medicine','Critical Care / Intensive Care','Dentistry',
+    'Dermatology','Diabetology','Dietetics / Nutrition','Emergency Medicine','Endocrinology','Endodontics',
+    'ENT / Otolaryngology','Family Medicine','Family Planning','Fertility / Reproductive Medicine','Gastroenterology',
+    'General Medicine / Internal Medicine','General Practice','General Surgery','Geriatrics','Gynaecology',
+    'Haematology','Hepatology','Infectious Disease','Interventional Cardiology','Interventional Radiology',
+    'IVF / Reproductive Medicine','Laboratory Medicine','Medical Genetics','Medical Oncology','Neonatology',
+    'Nephrology','Neurology','Neurosurgery','Nuclear Medicine','Obstetrics & Gynaecology','Occupational Medicine',
+    'Ophthalmology','Optometry','Oral & Maxillofacial Surgery','Orthodontics','Orthopaedics','Pain Medicine',
+    'Palliative Care','Pathology','Pediatric Cardiology','Pediatric Dentistry','Pediatric Neurology','Pediatric Surgery',
+    'Pediatrics','Periodontics','Physical Medicine & Rehabilitation','Physiotherapy','Plastic & Reconstructive Surgery',
+    'Preventive Medicine / Public Health','Prosthodontics','Psychiatry','Psychology / Counselling',
+    'Pulmonology / Respiratory Medicine','Radiation Oncology','Radiology','Rheumatology','Sleep Medicine',
+    'Speech & Language Therapy','Sports Medicine','Surgical Gastroenterology','Surgical Oncology','Thoracic Surgery',
+    'Transfusion Medicine','Trauma & Emergency Surgery','Urology','Vascular Surgery','Other / Custom Specialty'
+  ];
   let state = loadState();
   let selectedDate = dateKey(new Date());
   let calendarYear = new Date().getFullYear();
@@ -520,7 +539,7 @@
     document.getElementById('formSubmitBtn').textContent=doc?'Save changes':'Add doctor';
     document.getElementById('formContent').innerHTML=`<div class="form-grid">
       <div class="field full"><label for="doctorName">Doctor's name *</label><input id="doctorName" name="name" required maxlength="100" placeholder="e.g. Dr. A. Sharma" value="${escapeHTML(doc?.name||'')}"></div>
-      <div class="field"><label for="doctorSpecialty">Specialty / department</label><input id="doctorSpecialty" name="specialty" maxlength="100" placeholder="e.g. Dermatology" value="${escapeHTML(doc?.specialty||'')}"></div>
+      <div class="field"><label for="doctorSpecialty">Specialty / department</label><input id="doctorSpecialty" name="specialty" list="doctorSpecialtyPresets" maxlength="100" placeholder="Choose or type a specialty" value="${escapeHTML(doc?.specialty||'')}"><datalist id="doctorSpecialtyPresets">${SPECIALTY_PRESETS.map(v=>`<option value="${escapeHTML(v)}"></option>`).join('')}</datalist></div>
       <div class="field"><label for="doctorFollowup">Follow-up date</label><input id="doctorFollowup" name="followUpDate" type="date" value="${escapeHTML(doc?.followUpDate||'')}"><small>Set or update the next visit.</small></div>
       <div class="field full"><label for="doctorNotes">Notes</label><textarea id="doctorNotes" name="notes" maxlength="1000" placeholder="Optional appointment or prescription notes">${escapeHTML(doc?.notes||'')}</textarea></div>
     </div><div class="form-error" id="formError"></div>`;
