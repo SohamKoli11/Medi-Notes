@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f8fa">
+<title>Medi-Notes — Medication tracker</title>
+<style>
+  :root {
+    --bg:#f6f8fa; --surface:#fff; --surface-2:#f6f8fa; --surface-3:#eef2f6;
+    --text:#1f2328; --muted:#59636e; --subtle:#818b98; --border:#d0d7de;
+    --accent:#0969da; --accent-hover:#0550ae; --accent-soft:#ddf4ff;
+    --green:#1a7f37; --green-bg:#dafbe1; --green-border:#4ac26b;
+    --orange:#9a6700; --orange-bg:#fff1c2; --orange-border:#d4a72c;
+    --red:#cf222e; --red-bg:#ffebe9; --red-border:#ff8182;
+    --blue:#0969da; --blue-bg:#ddf4ff; --purple:#8250df; --purple-bg:#fbefff;
+    --shadow:0 1px 0 rgba(31,35,40,.04); --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+  button,input,select,textarea{font:inherit}
+  button{cursor:pointer}
+  button:disabled{cursor:not-allowed;opacity:.5}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px clamp(16px,3vw,34px);display:flex;justify-content:space-between;align-items:center;gap:16px;position:sticky;top:0;z-index:10}
+  .brand-wrap{display:flex;align-items:center;gap:12px;min-width:0}
+  .brand-mark{width:38px;height:38px;display:grid;place-items:center;color:#fff;background:#24292f;border-radius:10px;font-size:20px;flex-shrink:0}
+  .brand-name{font-size:19px;font-weight:700;letter-spacing:-.45px;line-height:1.2}
+  .brand-sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .top-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .btn{display:inline-flex;gap:7px;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 12px;border-radius:7px;font-weight:600;white-space:nowrap;box-shadow:var(--shadow);transition:background .12s,border-color .12s}
+  .btn:hover{background:var(--surface-2);border-color:#afb8c1}
+  .btn-primary{background:var(--accent);border-color:var(--accent);color:white}
+  .btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+  .btn-danger{color:var(--red)} .btn-quiet{border-color:transparent;box-shadow:none;background:transparent}
+  .btn-small{padding:5px 8px;font-size:12px}
+  .icon-btn{height:30px;width:30px;display:inline-grid;place-items:center;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--muted);padding:0;font-weight:700}
+  .icon-btn:hover{color:var(--accent);border-color:var(--accent)}
+  .page{max-width:1420px;padding:24px clamp(14px,3vw,34px) 42px;margin:0 auto}
+  .page-intro{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin-bottom:18px}
+  h1,h2,h3,h4,p{margin-top:0} h1{font-size:25px;letter-spacing:-.6px;margin-bottom:3px} h2{font-size:17px;margin-bottom:0;letter-spacing:-.2px} h3{font-size:15px;margin-bottom:0}
+  .muted{color:var(--muted)} .subtle{color:var(--subtle)} .tiny{font-size:11px} .small{font-size:12px}
+  .save-pill{display:inline-flex;gap:6px;align-items:center;color:var(--green);font-weight:600;font-size:12px;background:#dafbe1;border:1px solid #aceebb;padding:5px 9px;border-radius:999px;white-space:nowrap}
+  .save-pill.save-error{color:var(--red);background:var(--red-bg);border-color:#ffb4ae}
+  .summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+  .summary-card{padding:15px 16px;border:1px solid var(--border);background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);min-width:0}
+  .summary-label{font-size:12px;color:var(--muted);margin-bottom:8px;display:flex;gap:7px;align-items:center}
+  .summary-number{font-size:25px;line-height:1.2;letter-spacing:-.6px;font-weight:700;overflow-wrap:anywhere}
+  .summary-note{font-size:11px;color:var(--muted);margin-top:5px}
+  .workspace-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:16px;align-items:start}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;min-width:0}
+  .panel-header{padding:15px 17px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .panel-header p{margin:4px 0 0;color:var(--muted);font-size:12px}
+  .panel-body{padding:15px 17px}
+  .section-title{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .count-pill{border:1px solid var(--border);border-radius:999px;background:var(--surface-2);padding:1px 7px;color:var(--muted);font-size:11px;font-weight:600}
+  .empty-state{padding:25px 15px;text-align:center;border:1px dashed var(--border);border-radius:10px;background:#fbfcfd}
+  .empty-icon{font-size:26px;margin-bottom:8px}
+  .empty-state strong{display:block;margin-bottom:4px}
+  .empty-state p{color:var(--muted);margin:0 auto 12px;max-width:330px;font-size:12px}
+  .doctor-stack{display:grid;gap:12px}
+  .doctor-card{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface)}
+  .doctor-head{padding:12px 13px;background:var(--surface-2);display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid var(--border)}
+  .doctor-name-wrap{display:flex;gap:10px;min-width:0}
+  .doctor-avatar{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:#ddf4ff;color:#0550ae;font-weight:800;flex-shrink:0}
+  .doctor-name{font-size:14px;font-weight:700;overflow-wrap:anywhere}
+  .doctor-meta{font-size:11px;color:var(--muted);margin-top:2px}
+  .doctor-head-actions{display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+  .followup-line{font-size:11px;margin-top:6px;color:var(--muted)}
+  .followup-line strong{color:var(--purple)}
+  .medicine-list{padding:0 12px}
+  .medicine-row{padding:13px 0;border-bottom:1px solid var(--border);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start}
+  .medicine-row:last-child{border-bottom:0}
+  .medicine-titleline{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .medicine-name{font-weight:700;font-size:13px;overflow-wrap:anywhere}
+  .medicine-dose{font-size:11px;color:var(--muted)}
+  .medicine-detail{font-size:11px;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+  .tag-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+  .tag{font-size:10px;padding:3px 7px;border-radius:6px;border:1px solid var(--border);background:var(--surface-2);color:var(--muted);display:inline-flex;align-items:center;gap:4px}
+  .tag.blue{background:var(--blue-bg);border-color:#80ccff;color:#0550ae}.tag.green{background:var(--green-bg);border-color:#aceebb;color:var(--green)}
+  .tag.orange{background:var(--orange-bg);border-color:#eac54f;color:var(--orange)}.tag.purple{background:var(--purple-bg);border-color:#d8b9ff;color:#6639ba}
+  .medicine-actions{display:flex;flex-direction:column;gap:5px;align-items:flex-end}
+  .buy-toggle{font-size:10px;padding:4px 6px;border-radius:6px;border:1px solid var(--orange-border);color:var(--orange);background:var(--orange-bg);white-space:nowrap}
+  .buy-toggle.bought{color:var(--green);border-color:#aceebb;background:var(--green-bg)}
+  .tracker-panel{min-height:230px}
+  .tracker-list{display:grid;gap:11px}
+  .tracker-doctor-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--border);padding-bottom:5px;margin-top:3px}
+  .dose-card{border:1px solid var(--border);border-radius:9px;padding:11px 12px}
+  .dose-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .dose-card-name{font-weight:700;font-size:13px}
+  .dose-instruction{font-size:11px;color:var(--muted);margin-top:2px}
+  .dose-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .dose-chip{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:7px;padding:5px 7px;background:var(--surface-2);font-size:11px}
+  .dose-chip.done{background:var(--green-bg);border-color:#aceebb;color:var(--green)}
+  .dose-chip.late{background:var(--red-bg);border-color:#ffb4ae;color:var(--red)}
+  .dose-chip input{accent-color:var(--green);width:14px;height:14px;margin:0}
+  .dose-chip label{cursor:pointer;display:flex;align-items:center;gap:5px}
+  .needs-buy-box{margin-top:9px;background:#fff8c5;border:1px solid #eac54f;color:#7d4e00;border-radius:7px;padding:8px 9px;font-size:11px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .tracker-footer{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
+  .calendar-panel{margin-top:16px}
+  .calendar-header-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .year-label{font-weight:700;min-width:40px;text-align:center}
+  .calendar-body{padding:17px}
+  .heatmap-wrap{overflow-x:auto;padding-bottom:8px}
+  .heatmap{display:flex;gap:4px;min-width:max-content;align-items:flex-start}
+  .weekday-labels{padding-top:18px;display:grid;grid-template-rows:repeat(7,12px);gap:3px;margin-right:3px;font-size:9px;color:var(--muted);line-height:12px;width:22px;flex-shrink:0}
+  .week-col{display:grid;grid-template-rows:13px repeat(7,12px);gap:3px;width:12px;flex-shrink:0}
+  .month-label{font-size:9px;color:var(--muted);height:13px;white-space:nowrap;overflow:visible}
+  .day-cell{height:12px;width:12px;min-width:12px;border:1px solid rgba(31,35,40,.08);padding:0;border-radius:3px;background:#ebedf0;position:relative}
+  .day-cell:hover{outline:2px solid #8c959f;outline-offset:1px;z-index:1}
+  .day-cell.selected{outline:2px solid var(--accent);outline-offset:1px;z-index:2}
+  .day-cell.today{box-shadow:0 0 0 1px var(--text)}
+  .day-cell.level-green{background:#40c463;border-color:#40c463}.day-cell.level-orange{background:#eac54f;border-color:#d4a72c}.day-cell.level-red{background:#f85149;border-color:#cf222e}
+  .day-cell.level-supply{background:#d8dee4;border-color:#afb8c1;background-image:repeating-linear-gradient(135deg,transparent,transparent 3px,rgba(89,99,110,.25) 3px,rgba(89,99,110,.25) 5px)}
+  .day-cell.level-progress{background:#54aeff;border-color:#218bff}.day-cell.level-upcoming{background:#ddf4ff;border-color:#80ccff}
+  .day-cell.no-date{visibility:hidden;border:0}
+  .calendar-legend{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:13px;color:var(--muted);font-size:11px}
+  .legend-items{display:flex;gap:11px;flex-wrap:wrap;align-items:center}
+  .legend-item{display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .legend-swatch{width:11px;height:11px;border-radius:3px;border:1px solid rgba(31,35,40,.12)}
+  .calendar-detail{margin-top:0;border-top:0;padding-top:0}
+  .calendar-detail-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:11px}
+  .calendar-detail-title{font-size:14px;font-weight:700}
+  .date-status{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);color:var(--muted)}
+  .date-status.green{color:var(--green);background:var(--green-bg);border-color:#aceebb}.date-status.orange{color:var(--orange);background:var(--orange-bg);border-color:#eac54f}.date-status.red{color:var(--red);background:var(--red-bg);border-color:#ffb4ae}.date-status.supply{color:#59636e;background:#f0f3f6}
+  .bottom-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:16px;align-items:start}
+  .followup-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+  .followup-row:last-child{border-bottom:0}.followup-name{font-weight:600;font-size:12px}.followup-date{font-size:11px;color:var(--muted);margin-top:2px}
+  .future-card{padding:14px 16px;border:1px dashed var(--border);background:#fbfcfd;border-radius:var(--radius);display:flex;gap:12px;align-items:flex-start}
+  .future-icon{width:33px;height:33px;border-radius:8px;background:#eef2f6;display:grid;place-items:center;font-size:17px;flex-shrink:0}
+  .future-card h3{font-size:13px;margin-bottom:3px}.future-card p{font-size:11px;color:var(--muted);margin:0}
+  .footer-note{text-align:center;color:var(--muted);font-size:11px;padding:22px 0 4px}
+  .footer-note button{color:var(--accent);border:0;background:transparent;padding:0;text-decoration:underline}
+  .local-data-note{color:var(--subtle)}
+  dialog{border:1px solid var(--border);border-radius:12px;padding:0;background:var(--surface);color:var(--text);width:min(600px,calc(100vw - 24px));max-height:90vh;box-shadow:0 20px 70px rgba(31,35,40,.25)}
+  dialog::backdrop{background:rgba(31,35,40,.42);backdrop-filter:blur(2px)}
+  .dialog-head{padding:16px 19px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .dialog-head h2{font-size:17px}.dialog-content{padding:18px 19px;overflow:auto;max-height:calc(90vh - 125px)}
+  .dialog-footer{padding:12px 19px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:8px;align-items:center;background:var(--surface-2)}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{display:flex;flex-direction:column;gap:5px;min-width:0}.field.full{grid-column:1/-1}
+  .field label,.group-label{font-size:12px;font-weight:650;color:var(--text)}
+  .field small{font-weight:400;color:var(--muted);font-size:10px}
+  .field input,.field select,.field textarea{width:100%;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 9px;border-radius:7px;outline:none;min-width:0}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(9,105,218,.12)}
+  .field textarea{min-height:72px;resize:vertical}
+  .choice-grid{display:flex;gap:7px;flex-wrap:wrap}
+  .choice{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:7px;padding:7px 9px;font-size:12px;cursor:pointer;background:var(--surface)}
+  .choice input{width:auto;margin:0;accent-color:var(--accent)}
+  .slot-time-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:7px}
+  .slot-time{padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2)}
+  .slot-time-head{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;margin-bottom:5px}.slot-time-head input{width:auto;margin:0;accent-color:var(--accent)}.slot-time input[type=time]{padding:5px}
+  .subsection{border-top:1px solid var(--border);padding-top:13px;margin-top:15px}
+  .weekday-choices{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.weekday-choice{font-size:11px;border:1px solid var(--border);padding:5px 8px;border-radius:6px;display:flex;align-items:center;gap:5px}.weekday-choice input{width:auto;margin:0}
+  .form-error{font-size:12px;color:var(--red);min-height:16px;margin-top:7px}
+  .detail-info{display:grid;gap:10px}.detail-info-row{display:grid;grid-template-columns:115px 1fr;gap:12px;padding-bottom:9px;border-bottom:1px solid var(--border);font-size:12px}.detail-info-row:last-child{border-bottom:0}.detail-info-label{color:var(--muted)}.detail-info-value{overflow-wrap:anywhere}
+  .reminder-list{display:grid;gap:9px}.reminder-item{padding:10px 11px;border:1px solid #ffb4ae;background:#fff8f7;border-radius:9px;display:flex;justify-content:space-between;gap:12px;align-items:center}.reminder-item strong{font-size:13px;display:block}.reminder-item small{color:var(--muted)}
+  .toast{position:fixed;bottom:20px;right:20px;z-index:50;background:#24292f;color:white;padding:10px 14px;border-radius:9px;box-shadow:0 5px 22px rgba(0,0,0,.2);font-size:12px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translateY(0)}
+  .hidden{display:none!important}
+  @media(max-width:850px){.workspace-grid{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.tracker-panel{min-height:unset}}
+  @media(max-width:640px){.topbar{align-items:flex-start;padding:12px 14px}.brand-mark{width:34px;height:34px}.brand-name{font-size:17px}.brand-sub{font-size:10px}.top-actions{gap:5px}.top-actions .btn{font-size:11px;padding:7px 8px}.page{padding:17px 12px 30px}.page-intro{align-items:flex-start;flex-direction:column}.page-intro h1{font-size:22px}.summary-grid{gap:7px}.summary-card{padding:10px}.summary-label{font-size:10px;gap:4px;line-height:1.3}.summary-number{font-size:21px}.summary-note{font-size:10px}.panel-header,.panel-body{padding:12px}.doctor-head{padding:10px}.doctor-head-actions .btn{padding:4px 6px;font-size:10px}.medicine-list{padding:0 10px}.medicine-row{grid-template-columns:minmax(0,1fr);}.medicine-actions{flex-direction:row;align-items:center;justify-content:flex-start;flex-wrap:wrap}.bottom-grid{grid-template-columns:1fr}.calendar-body{padding:12px}.calendar-legend{align-items:flex-start}.legend-items{gap:7px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.slot-time-grid{grid-template-columns:1fr}.detail-info-row{grid-template-columns:95px 1fr}.dialog-content{padding:14px}.dialog-head,.dialog-footer{padding:12px 14px}.reminder-item{align-items:flex-start;flex-direction:column}.save-pill{font-size:10px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand-wrap">
+    <div class="brand-mark" aria-hidden="true">✚</div>
+    <div><div class="brand-name">Medi-Notes</div><div class="brand-sub">Your medication schedule, in one place</div></div>
+  </div>
+  <div class="top-actions">
+    <button class="btn" id="exportBtn" title="Download a backup of your data">↧ Export backup</button>
+    <button class="btn" id="addDoctorBtn">＋ Add doctor</button>
+    <button class="btn btn-primary" id="addMedicineBtn">＋ Add medicine</button>
+  </div>
+</header>
+<main class="page">
+  <div class="page-intro">
+    <div><h1>Medication overview</h1><div class="muted small">Keep your prescriptions organised and track each scheduled dose.</div></div>
+    <div class="save-pill" id="saveStatus" title="Your records stay in this browser profile and are not synced online."><span>●</span> Local storage ready</div>
+  </div>
+  <section class="summary-grid" id="summaryGrid" aria-label="Overview summary"></section>
+  <div class="workspace-grid">
+    <section class="panel tracker-panel" aria-labelledby="todayHeading">
+      <div class="panel-header">
+        <div><div class="section-title"><h2 id="todayHeading">Today's doses</h2></div><p id="todaySubtitle">Tick each dose as you take it.</p></div>
+        <button class="btn btn-small" id="jumpTodayBtn">Today ↗</button>
+      </div>
+      <div class="panel-body">
+        <div id="todayTracker"></div>
+        <div class="tracker-footer"><span>Dose check-offs are saved automatically.</span><span id="todayProgress">0 / 0</span></div>
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="doctorsHeading">
+      <div class="panel-header">
+        <div><div class="section-title"><h2 id="doctorsHeading">Doctors & medicines</h2><span class="count-pill" id="doctorCount">0 doctors</span></div><p>Keep medicines grouped by the doctor who prescribed them.</p></div>
+        <button class="btn btn-small" id="panelAddDoctorBtn">＋ Doctor</button>
+      </div>
+      <div class="panel-body"><div id="doctorList" class="doctor-stack"></div></div>
+    </section>
+  </div>
+  <section class="panel calendar-panel" aria-labelledby="calendarHeading">
+    <div class="panel-header">
+      <div><div class="section-title"><h2 id="calendarHeading">Adherence calendar</h2></div><p>Choose any date to review or update its scheduled doses.</p></div>
+      <div class="calendar-header-actions"><button class="btn btn-small" id="deviceCalendarBtn" title="Download upcoming doses and follow-ups as an .ics file for your device calendar">↗ Device calendar</button><button class="icon-btn" id="prevYearBtn" aria-label="Previous year">‹</button><span class="year-label" id="calendarYear"></span><button class="icon-btn" id="nextYearBtn" aria-label="Next year">›</button></div>
+    </div>
+    <div class="calendar-body">
+      <div class="heatmap-wrap"><div class="heatmap" id="heatmap" role="group" aria-label="Daily medication adherence calendar"></div></div>
+      <div class="calendar-legend">
+        <span id="calendarRangeNote">Select a square to see its doses.</span>
+        <div class="legend-items">
+          <span class="legend-item"><span class="legend-swatch" style="background:#ebedf0"></span>No scheduled doses</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:#40c463"></span>Complete</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:#eac54f"></span>Up to 25% missed</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:#f85149"></span>More than 25% missed</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:#d8dee4"></span>Needs purchase</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:#54aeff"></span>In progress</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="bottom-grid">
+    <section class="panel" aria-labelledby="selectedScheduleHeading">
+      <div class="panel-header"><div><h2 id="selectedScheduleHeading">Scheduled doses</h2><p>Review or update doses for the selected calendar date.</p></div><button class="btn btn-small" id="jumpSelectedTodayBtn">Today ↗</button></div>
+      <div class="panel-body">
+        <div class="calendar-detail">
+          <div class="calendar-detail-header"><div><div class="calendar-detail-title" id="selectedDateTitle">Selected day</div><div class="tiny muted" id="selectedDateSubtitle">Scheduled doses for this day</div></div><span class="date-status" id="selectedDateStatus">No doses</span></div>
+          <div id="selectedDateTracker"></div>
+        </div>
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="followupHeading">
+      <div class="panel-header"><div><h2 id="followupHeading">Doctor follow-ups</h2><p>Appointments you've added to a doctor's profile.</p></div><button class="btn btn-small" id="manageFollowupsBtn">Manage doctors</button></div>
+      <div class="panel-body" id="followupList"></div>
+    </section>
+  </div>
+  <div class="footer-note">Medi-Notes is a personal reminder and tracking tool, not a substitute for your clinician's instructions. <span class="local-data-note" title="Records stay in this browser profile and are not uploaded or synchronized.">Stored locally in this browser · not synced online</span> · <button id="importBtn">Import backup</button> · <button id="resetBtn">Clear local data</button></div>
+  <input type="file" id="importFile" accept="application/json,.json" class="hidden">
+</main>
+<dialog id="formDialog" aria-labelledby="formTitle"><form id="mainForm"><div class="dialog-head"><h2 id="formTitle">Add item</h2><button class="icon-btn" type="button" data-close-dialog aria-label="Close">×</button></div><div class="dialog-content" id="formContent"></div><div class="dialog-footer"><span class="tiny muted">Fields marked * are required.</span><div style="display:flex;gap:7px"><button type="button" class="btn" data-close-dialog>Cancel</button><button type="submit" class="btn btn-primary" id="formSubmitBtn">Save</button></div></div></form></dialog>
+<dialog id="infoDialog"><div class="dialog-head"><h2 id="infoTitle">Medicine details</h2><button class="icon-btn" type="button" data-close-dialog aria-label="Close">×</button></div><div class="dialog-content" id="infoContent"></div><div class="dialog-footer"><span class="tiny muted">AI explanations are not connected yet.</span><button class="btn" type="button" data-close-dialog>Close</button></div></dialog>
+<dialog id="reminderDialog"><div class="dialog-head"><div><h2>💊 Your pending meds</h2><div class="tiny muted" style="margin-top:3px">These scheduled doses are 2+ hours overdue.</div></div><button class="icon-btn" type="button" data-close-reminder aria-label="Close">×</button></div><div class="dialog-content"><div id="reminderList" class="reminder-list"></div><p class="tiny muted" style="margin:12px 0 0">Check your prescription instructions before taking a dose late or making up a missed dose.</p></div><div class="dialog-footer"><span class="tiny muted">Reminder only — not medical advice.</span><button class="btn" type="button" data-close-reminder>Not now</button></div></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  'use strict';
+  const STORAGE_KEY = 'medi-notes.data.v1';
+  const LEGACY_STORAGE_KEY = 'dosebook.data.v1';
+  const SLOTS = [
+    {key:'morning', label:'Morning', defaultTime:'08:00'},
+    {key:'afternoon', label:'Afternoon', defaultTime:'13:00'},
+    {key:'night', label:'Night', defaultTime:'20:00'}
+  ];
+  const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const FULL_WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  let state = loadState();
+  let selectedDate = dateKey(new Date());
+  let calendarYear = new Date().getFullYear();
+  let editing = null;
+  let reminderShownThisSession = false;
+  let toastTimer;
+
+  function freshState(){ return {doctors:[],medicines:[],logs:{}}; }
+  function setSaveStatus(message, failed=false){
+    const el=document.getElementById('saveStatus');
+    if(!el)return;
+    el.classList.toggle('save-error',failed);
+    el.innerHTML=`<span>●</span> ${escapeHTML(message)}`;
+  }
+  function loadState(){
+    try {
+      let raw=localStorage.getItem(STORAGE_KEY);
+      let migrated=false;
+      if(!raw){ raw=localStorage.getItem(LEGACY_STORAGE_KEY); migrated=!!raw; }
+      if(!raw){ setSaveStatus('Local storage ready'); return freshState(); }
+      const parsed=JSON.parse(raw);
+      if(!parsed || !Array.isArray(parsed.doctors) || !Array.isArray(parsed.medicines)){
+        setSaveStatus('Stored data needs attention',true);
+        return freshState();
+      }
+      if(!parsed.logs || typeof parsed.logs!=='object') parsed.logs={};
+      if(migrated){ localStorage.setItem(STORAGE_KEY,JSON.stringify(parsed)); localStorage.removeItem(LEGACY_STORAGE_KEY); }
+      setSaveStatus('Saved locally');
+      return parsed;
+    } catch (err) {
+      setSaveStatus('Local storage unavailable',true);
+      return freshState();
+    }
+  }
+  function persist(){
+    try {
+      const serialized=JSON.stringify(state);
+      localStorage.setItem(STORAGE_KEY,serialized);
+      if(localStorage.getItem(STORAGE_KEY)!==serialized) throw new Error('Storage verification failed');
+      setSaveStatus('Saved locally');
+      return true;
+    } catch (err) {
+      setSaveStatus('Save failed',true);
+      showToast('Could not save locally. Export a backup or check browser storage settings.');
+      return false;
+    }
+  }
+  function uid(){ return (crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2); }
+  function escapeHTML(value){ return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+  function parseDate(key){ const [y,m,d] = key.split('-').map(Number); return new Date(y,m-1,d,12,0,0,0); }
+  function dateKey(date){ return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
+  function addDays(date, count){ const d = new Date(date); d.setDate(d.getDate()+count); return d; }
+  function diffDays(aKey,bKey){ return Math.round((parseDate(aKey)-parseDate(bKey))/86400000); }
+  function todayKey(){ return dateKey(new Date()); }
+  function formatDate(key, options={weekday:'short',month:'short',day:'numeric',year:'numeric'}){ return parseDate(key).toLocaleDateString(undefined, options); }
+  function formatTime(time){ if(!time) return ''; const [h,m]=time.split(':').map(Number); const d=new Date(); d.setHours(h,m,0,0); return d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}); }
+  function formatSlot(slot){ return SLOTS.find(s=>s.key===slot)?.label || slot; }
+  function getDoctor(id){ return state.doctors.find(d=>d.id===id); }
+  function getMedicine(id){ return state.medicines.find(m=>m.id===id); }
+  function logKey(medId, day, slot){ return `${medId}::${day}::${slot}`; }
+  function isTaken(medId, day, slot){ return !!state.logs[logKey(medId,day,slot)]?.taken; }
+  function medicineEndDate(med){ if (!med.durationDays || Number(med.durationDays) <= 0) return null; return dateKey(addDays(parseDate(med.startDate), Number(med.durationDays)-1)); }
+  function isScheduled(med, day){
+    if (day < med.startDate) return false;
+    const end=medicineEndDate(med); if(end && day>end) return false;
+    const d=parseDate(day);
+    if(med.frequency==='alternate') return diffDays(day,med.startDate)%2===0;
+    if(med.frequency==='weekdays') return (med.weekdays||[]).includes(d.getDay());
+    return true;
+  }
+  function getScheduledDoses(day){
+    const rows=[];
+    for(const med of state.medicines){
+      if(!isScheduled(med,day)) continue;
+      for(const slot of (med.timeSlots||[])) rows.push({med,slot,time:(med.slotTimes||{})[slot] || (SLOTS.find(s=>s.key===slot)?.defaultTime||'08:00'),doctor:getDoctor(med.doctorId)});
+    }
+    return rows.sort((a,b)=>a.time.localeCompare(b.time) || a.med.name.localeCompare(b.med.name));
+  }
+  function doseIsOverdue(dose, now=new Date()){
+    if(dose.med.purchased===false || isTaken(dose.med.id,todayKey(),dose.slot)) return false;
+    if(dose.time == null) return false;
+    const [h,m]=dose.time.split(':').map(Number);
+    const scheduled=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,m,0,0);
+    return now.getTime()-scheduled.getTime() >= 2*60*60*1000;
+  }
+  function getDayStatus(day){
+    const doses=getScheduledDoses(day);
+    if(!doses.length) return {level:'none',label:'No scheduled doses',total:0,taken:0,missed:0,unbought:0};
+    const unbought=doses.filter(d=>d.med.purchased===false).length;
+    const tracked=doses.filter(d=>d.med.purchased!==false);
+    const taken=tracked.filter(d=>isTaken(d.med.id,day,d.slot)).length;
+    let overdueMissed=0;
+    const today=todayKey();
+    for(const dose of tracked){
+      if(isTaken(dose.med.id,day,dose.slot)) continue;
+      if(day<today) overdueMissed++;
+      else if(day===today && doseIsOverdue(dose)) overdueMissed++;
+    }
+    if(unbought && tracked.length===0) return {level:'supply',label:'Needs purchase',total:doses.length,taken,missed:0,unbought};
+    const missedRatio=tracked.length ? overdueMissed/tracked.length : 0;
+    if(overdueMissed>0){
+      const level=missedRatio<=0.25 ? 'orange':'red';
+      return {level,label:level==='orange'?'Up to 25% missed':'More than 25% missed',total:doses.length,taken,missed:overdueMissed,unbought};
+    }
+    if(unbought){
+      if(taken===tracked.length && tracked.length>0) return {level:'supply',label:'Needs purchase',total:doses.length,taken,missed:0,unbought};
+      return {level:'supply',label:'Needs purchase',total:doses.length,taken,missed:0,unbought};
+    }
+    if(taken===doses.length) return {level:'green',label:'All doses completed',total:doses.length,taken,missed:0,unbought:0};
+    if(day>today) return {level:'upcoming',label:'Upcoming doses',total:doses.length,taken,missed:0,unbought:0};
+    if(day===today && doses.some(d=>!isTaken(d.med.id,day,d.slot) && !doseIsOverdue(d))) return {level:'progress',label:'In progress / not due yet',total:doses.length,taken,missed:0,unbought:0};
+    // Historical scheduled doses without check-offs are missed, regardless of the clock time.
+    if(day<today && overdueMissed===0 && tracked.length) return {level:'red',label:'Missed doses',total:doses.length,taken,missed:tracked.length-taken,unbought};
+    return {level:'progress',label:'In progress',total:doses.length,taken,missed:0,unbought};
+  }
+  function showToast(message){
+    const el=document.getElementById('toast'); el.textContent=message; el.classList.add('show');
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2600);
+  }
+  function openDialog(dialog){ if(!dialog.open) dialog.showModal(); }
+  function closeDialogs(){ document.querySelectorAll('dialog[open]').forEach(d=>d.close()); }
+  function addTag(text, type=''){ return `<span class="tag ${type}">${escapeHTML(text)}</span>`; }
+  function instructionText(med){
+    const parts=[];
+    if(med.action) parts.push(med.action);
+    if(med.amount) parts.push(med.amount);
+    if(med.foodRelation && med.foodRelation!=='none') parts.push(`${med.foodRelation} ${med.meal||'meal'}`);
+    return parts.join(' · ') || 'Follow the recorded prescription instructions';
+  }
+  function scheduleText(med){
+    return (med.timeSlots||[]).map(slot=>`${formatSlot(slot)} ${formatTime((med.slotTimes||{})[slot] || '')}`).join(' · ') || 'No time selected';
+  }
+  function frequencyText(med){
+    if(med.frequency==='alternate') return 'Every other day';
+    if(med.frequency==='weekdays') return `Selected days: ${(med.weekdays||[]).map(n=>WEEKDAYS[n]).join(', ') || 'none'}`;
+    return 'Every day';
+  }
+  function renderSummary(){
+    const activeMeds=state.medicines.filter(m=>isScheduled(m,todayKey())).length;
+    const next=state.doctors.filter(d=>d.followUpDate && d.followUpDate>=todayKey()).sort((a,b)=>a.followUpDate.localeCompare(b.followUpDate))[0];
+    const summary=document.getElementById('summaryGrid');
+    summary.innerHTML=`
+      <div class="summary-card"><div class="summary-label">♧ Doctors</div><div class="summary-number">${state.doctors.length}</div><div class="summary-note">Separate lists by prescriber</div></div>
+      <div class="summary-card"><div class="summary-label">✚ Scheduled medicines</div><div class="summary-number">${activeMeds}</div><div class="summary-note">Medicines scheduled for today</div></div>
+      <div class="summary-card"><div class="summary-label">▦ Next follow-up</div><div class="summary-number" style="font-size:${next?'20px':'25px'}">${next?escapeHTML(formatDate(next.followUpDate,{month:'short',day:'numeric'})):'—'}</div><div class="summary-note">${next?escapeHTML(next.name):'No upcoming follow-up added'}</div></div>`;
+    document.getElementById('doctorCount').textContent=`${state.doctors.length} ${state.doctors.length===1?'doctor':'doctors'}`;
+  }
+  function renderDoctors(){
+    const root=document.getElementById('doctorList');
+    if(!state.doctors.length){
+      root.innerHTML=`<div class="empty-state"><div class="empty-icon">＋</div><strong>Start with your first doctor</strong><p>Add a doctor, then add the medicines prescribed by them. Each doctor's medicines stay grouped together.</p><button class="btn btn-primary" id="emptyAddDoctor">＋ Add first doctor</button></div>`;
+      return;
+    }
+    root.innerHTML=state.doctors.map((doc,index)=>{
+      const meds=state.medicines.filter(m=>m.doctorId===doc.id);
+      const initials=doc.name.trim().split(/\s+/).slice(0,2).map(s=>s[0]?.toUpperCase()||'').join('');
+      let follow='';
+      if(doc.followUpDate){
+        const d=diffDays(doc.followUpDate,todayKey());
+        const ftext=d<0?`Follow-up date passed ${Math.abs(d)} day${Math.abs(d)===1?'':'s'} ago`:d===0?'Follow-up today':`Follow-up in ${d} day${d===1?'':'s'}`;
+        follow=`<div class="followup-line">▦ ${ftext} · <strong>${escapeHTML(formatDate(doc.followUpDate,{month:'short',day:'numeric',year:'numeric'}))}</strong></div>`;
+      }
+      const medsHtml=meds.length?meds.map(med=>{
+        const end=medicineEndDate(med);
+        return `<div class="medicine-row">
+          <div class="medicine-main">
+            <div class="medicine-titleline"><span class="medicine-name">${escapeHTML(med.name)}</span>${med.amount?`<span class="medicine-dose">${escapeHTML(med.amount)}</span>`:''}<button class="icon-btn" data-action="info-med" data-id="${escapeHTML(med.id)}" title="View medicine notes and purpose" aria-label="Information about ${escapeHTML(med.name)}" style="height:22px;width:22px;font-size:11px">i</button></div>
+            <div class="medicine-detail">${escapeHTML(instructionText(med))}</div>
+            <div class="medicine-detail">${escapeHTML(scheduleText(med))}</div>
+            <div class="tag-row">${addTag(frequencyText(med),med.frequency==='alternate'?'purple':'')}${addTag(`Started ${formatDate(med.startDate,{month:'short',day:'numeric'})}`)}${end?addTag(`Ends ${formatDate(end,{month:'short',day:'numeric'})}`):addTag('Ongoing','blue')}${med.notes?addTag('Has notes',''):''}</div>
+          </div>
+          <div class="medicine-actions">
+            <button class="buy-toggle ${med.purchased!==false?'bought':''}" data-action="toggle-purchased" data-id="${escapeHTML(med.id)}">${med.purchased===false?'＋ Need to buy':'✓ Purchased'}</button>
+            <div style="display:flex;gap:5px"><button class="btn btn-small" data-action="edit-med" data-id="${escapeHTML(med.id)}">Edit</button><button class="icon-btn" data-action="delete-med" data-id="${escapeHTML(med.id)}" title="Delete medicine" aria-label="Delete ${escapeHTML(med.name)}">×</button></div>
+          </div>
+        </div>`;
+      }).join(''):`<div class="empty-state" style="margin:12px 0;padding:17px"><strong>No medicines added yet</strong><p>Add a medicine to start tracking its schedule.</p><button class="btn btn-small" data-action="add-med-for-doctor" data-id="${escapeHTML(doc.id)}">＋ Add medicine</button></div>`;
+      return `<article class="doctor-card">
+        <div class="doctor-head"><div style="min-width:0"><div class="doctor-name-wrap"><div class="doctor-avatar">${escapeHTML(initials||'MD')}</div><div style="min-width:0"><div class="doctor-name">${escapeHTML(doc.name)}</div><div class="doctor-meta">${escapeHTML(doc.specialty||'Doctor / specialist not specified')} · ${meds.length} ${meds.length===1?'medicine':'medicines'}</div>${follow}</div></div></div>
+          <div class="doctor-head-actions"><button class="btn btn-small" data-action="add-med-for-doctor" data-id="${escapeHTML(doc.id)}">＋ Medicine</button><button class="icon-btn" data-action="edit-doctor" data-id="${escapeHTML(doc.id)}" title="Edit doctor" aria-label="Edit doctor ${escapeHTML(doc.name)}">✎</button><button class="icon-btn" data-action="delete-doctor" data-id="${escapeHTML(doc.id)}" title="Delete doctor and medicines" aria-label="Delete doctor ${escapeHTML(doc.name)}">×</button></div>
+        </div><div class="medicine-list">${medsHtml}</div>
+      </article>`;
+    }).join('');
+  }
+  function renderTracker(container, day){
+    const doses=getScheduledDoses(day);
+    if(!doses.length){
+      container.innerHTML=`<div class="empty-state"><div class="empty-icon">☑</div><strong>No medicines scheduled</strong><p>${day===todayKey()?'Add a medicine and choose its schedule to see doses here.':'There are no active medicine schedules for this date.'}</p>${state.doctors.length?`<button class="btn btn-small" data-action="add-med">＋ Add medicine</button>`:`<button class="btn btn-small" data-action="add-doctor">＋ Add doctor</button>`}</div>`;
+      return {total:0,taken:0};
+    }
+    const doctorOrder=[];
+    for(const dose of doses){ const key=dose.doctor?.id||'no-doctor'; if(!doctorOrder.includes(key)) doctorOrder.push(key); }
+    let total=0,taken=0;
+    container.innerHTML=doctorOrder.map(docId=>{
+      const docDoses=doses.filter(d=>(d.doctor?.id||'no-doctor')===docId);
+      const doc=docDoses[0]?.doctor;
+      const byMed=[];
+      for(const dose of docDoses){let group=byMed.find(g=>g.med.id===dose.med.id);if(!group){group={med:dose.med,doses:[]};byMed.push(group)}group.doses.push(dose)}
+      return `<div class="tracker-list">${doc?`<div class="tracker-doctor-label">${escapeHTML(doc.name)}</div>`:`<div class="tracker-doctor-label">Doctor not found</div>`}${byMed.map(group=>{
+        const med=group.med;
+        const slots=group.doses.map(d=>{
+          const didTake=isTaken(med.id,day,d.slot); const overdue=day<=todayKey() && !didTake && med.purchased!==false && (day<todayKey() || (day===todayKey() && doseIsOverdue(d)));
+          total++; if(didTake) taken++;
+          const label=`${formatSlot(d.slot)} · ${formatTime(d.time)}`;
+          return `<span class="dose-chip ${didTake?'done':overdue?'late':''}"><label><input type="checkbox" data-action="toggle-dose" data-med-id="${escapeHTML(med.id)}" data-date="${escapeHTML(day)}" data-slot="${escapeHTML(d.slot)}" ${didTake?'checked':''} ${(med.purchased===false || day>todayKey())?'disabled':''} aria-label="Mark ${escapeHTML(med.name)} ${escapeHTML(formatSlot(d.slot))} as taken on ${escapeHTML(day)}">${escapeHTML(label)}${didTake?' ✓':overdue?' · overdue':''}</label></span>`;
+        }).join('');
+        const purchase=med.purchased===false?`<div class="needs-buy-box"><span>⚠ Not purchased yet — check off doses after you have the medicine.</span><button class="btn btn-small" data-action="toggle-purchased" data-id="${escapeHTML(med.id)}">Mark purchased</button></div>`:'';
+        return `<div class="dose-card"><div class="dose-card-top"><div><div class="dose-card-name">${escapeHTML(med.name)}${med.amount?` <span class="medicine-dose">· ${escapeHTML(med.amount)}</span>`:''}</div><div class="dose-instruction">${escapeHTML(instructionText(med))}</div></div><button class="icon-btn" data-action="info-med" data-id="${escapeHTML(med.id)}" title="Medicine notes / purpose">i</button></div><div class="dose-chips">${slots}</div>${purchase}</div>`;
+      }).join('')}</div>`;
+    }).join('');
+    return {total,taken};
+  }
+  function renderHeatmap(){
+    const root=document.getElementById('heatmap');
+    document.getElementById('calendarYear').textContent=calendarYear;
+    const jan1=new Date(calendarYear,0,1,12); const last=new Date(calendarYear,11,31,12);
+    const gridStart=addDays(jan1,-jan1.getDay());
+    const gridEnd=addDays(last,6-last.getDay());
+    const weeks=Math.ceil((gridEnd-gridStart)/86400000/7);
+    let html=`<div class="weekday-labels"><span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span></div>`;
+    // GitHub-style columns; labels align with the first week containing each month.
+    for(let w=0;w<weeks;w++){
+      const weekStart=addDays(gridStart,w*7);
+      let monthLabel='';
+      for(let k=0;k<7;k++){const d=addDays(weekStart,k);if(d.getFullYear()===calendarYear&&d.getDate()===1){monthLabel=d.toLocaleDateString(undefined,{month:'short'});break;}}
+      html+=`<div class="week-col"><div class="month-label">${escapeHTML(monthLabel)}</div>`;
+      for(let dayIndex=0;dayIndex<7;dayIndex++){
+        const d=addDays(weekStart,dayIndex); const key=dateKey(d);
+        if(d.getFullYear()!==calendarYear){html+=`<span class="day-cell no-date" aria-hidden="true"></span>`;continue;}
+        const status=getDayStatus(key); let level=status.level;
+        const classes=['day-cell']; if(level==='green')classes.push('level-green');else if(level==='orange')classes.push('level-orange');else if(level==='red')classes.push('level-red');else if(level==='supply')classes.push('level-supply');else if(level==='progress')classes.push('level-progress');else if(level==='upcoming')classes.push('level-upcoming');
+        if(key===selectedDate)classes.push('selected');if(key===todayKey())classes.push('today');
+        const title=`${formatDate(key,{month:'long',day:'numeric',year:'numeric'})}: ${status.label}${status.total?` (${status.taken}/${status.total} checked${status.missed?`, ${status.missed} missed`:''}${status.unbought?`, ${status.unbought} need purchase`:''})`:''}`;
+        html+=`<button type="button" class="${classes.join(' ')}" data-action="select-date" data-date="${key}" title="${escapeHTML(title)}" aria-label="${escapeHTML(title)}"></button>`;
+      }
+      html+='</div>';
+    }
+    root.innerHTML=html;
+    document.getElementById('calendarRangeNote').textContent=`${calendarYear} · Click a day to review doses. Days without scheduled medicines stay neutral.`;
+    const status=getDayStatus(selectedDate);
+    document.getElementById('selectedDateTitle').textContent=formatDate(selectedDate,{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+    document.getElementById('selectedDateSubtitle').textContent=`${status.total} scheduled dose${status.total===1?'':'s'} · ${status.taken} checked off${status.missed?` · ${status.missed} overdue/missed`:''}${status.unbought?` · ${status.unbought} need purchase`:''}`;
+    const badge=document.getElementById('selectedDateStatus'); badge.textContent=status.label;badge.className=`date-status ${status.level==='green'?'green':status.level==='orange'?'orange':status.level==='red'?'red':status.level==='supply'?'supply':''}`;
+    renderTracker(document.getElementById('selectedDateTracker'),selectedDate);
+  }
+  function renderFollowups(){
+    const root=document.getElementById('followupList');
+    const list=state.doctors.filter(d=>d.followUpDate).sort((a,b)=>a.followUpDate.localeCompare(b.followUpDate));
+    if(!list.length){root.innerHTML=`<div class="empty-state" style="padding:17px"><strong>No follow-ups scheduled</strong><p>Add a follow-up date while adding or editing a doctor.</p><button class="btn btn-small" data-action="add-doctor">＋ Add doctor</button></div>`;return;}
+    root.innerHTML=list.map(doc=>{
+      const delta=diffDays(doc.followUpDate,todayKey()); const status=delta<0?`${Math.abs(delta)} day${Math.abs(delta)===1?'':'s'} ago`:delta===0?'Today':`In ${delta} day${delta===1?'':'s'}`;
+      return `<div class="followup-row"><div><div class="followup-name">${escapeHTML(doc.name)}</div><div class="followup-date">${escapeHTML(formatDate(doc.followUpDate,{weekday:'short',month:'short',day:'numeric',year:'numeric'}))} · ${escapeHTML(status)}</div></div><button class="btn btn-small" data-action="edit-doctor" data-id="${escapeHTML(doc.id)}">Edit</button></div>`;
+    }).join('');
+  }
+  function renderApp(){
+    renderSummary();renderDoctors();
+    document.getElementById('todaySubtitle').textContent=formatDate(todayKey(),{weekday:'long',month:'short',day:'numeric'});
+    const tally=renderTracker(document.getElementById('todayTracker'),todayKey());
+    document.getElementById('todayProgress').textContent=`${tally.taken} / ${tally.total} checked`;
+    renderHeatmap();renderFollowups();
+    // Keep the app's local-only persistence architecture. A future scanner may parse a prescription
+    // image/PDF and pre-fill the same medicine form; it must not silently save unverified OCR output.
+    // Future: connect the medicine info icon to an AI-assisted purpose explainer with safety citations.
+  }
+  function openDoctorForm(id=null){
+    editing={type:'doctor',id}; const doc=id?getDoctor(id):null;
+    document.getElementById('formTitle').textContent=doc?'Edit doctor':'Add doctor';
+    document.getElementById('formSubmitBtn').textContent=doc?'Save changes':'Add doctor';
+    document.getElementById('formContent').innerHTML=`<div class="form-grid">
+      <div class="field full"><label for="doctorName">Doctor's name *</label><input id="doctorName" name="name" required maxlength="100" placeholder="e.g. Dr. A. Sharma" value="${escapeHTML(doc?.name||'')}"></div>
+      <div class="field"><label for="doctorSpecialty">Specialty / department</label><input id="doctorSpecialty" name="specialty" maxlength="100" placeholder="e.g. Dermatology" value="${escapeHTML(doc?.specialty||'')}"></div>
+      <div class="field"><label for="doctorFollowup">Follow-up date</label><input id="doctorFollowup" name="followUpDate" type="date" value="${escapeHTML(doc?.followUpDate||'')}"><small>Set or update the next visit.</small></div>
+      <div class="field full"><label for="doctorNotes">Notes</label><textarea id="doctorNotes" name="notes" maxlength="1000" placeholder="Optional appointment or prescription notes">${escapeHTML(doc?.notes||'')}</textarea></div>
+    </div><div class="form-error" id="formError"></div>`;
+    openDialog(document.getElementById('formDialog'));
+    setTimeout(()=>document.getElementById('doctorName')?.focus(),30);
+  }
+  function openMedicineForm(id=null, doctorId=null){
+    if(!state.doctors.length){showToast('Add a doctor before adding a medicine.');openDoctorForm();return;}
+    editing={type:'medicine',id};const med=id?getMedicine(id):null;
+    const selectedDoctor=doctorId || med?.doctorId || state.doctors[0].id;
+    document.getElementById('formTitle').textContent=med?'Edit medicine':'Add medicine';
+    document.getElementById('formSubmitBtn').textContent=med?'Save changes':'Add medicine';
+    const doctorOptions=state.doctors.map(d=>`<option value="${escapeHTML(d.id)}" ${d.id===selectedDoctor?'selected':''}>${escapeHTML(d.name)}</option>`).join('');
+    const slots=med?.timeSlots||['morning'];
+    const times=med?.slotTimes||{};
+    const slotHtml=SLOTS.map(s=>`<div class="slot-time"><div class="slot-time-head"><input type="checkbox" name="timeSlots" value="${s.key}" id="slot_${s.key}" ${slots.includes(s.key)?'checked':''}><label for="slot_${s.key}">${s.label}</label></div><input type="time" name="time_${s.key}" value="${escapeHTML(times[s.key]||s.defaultTime)}" aria-label="${s.label} dose time"></div>`).join('');
+    const weekdays=med?.weekdays||[1,2,3,4,5];
+    document.getElementById('formContent').innerHTML=`<div class="form-grid">
+      <div class="field full"><label for="medDoctor">Prescribing doctor *</label><select id="medDoctor" name="doctorId" required>${doctorOptions}</select></div>
+      <div class="field"><label for="medName">Medicine name *</label><input id="medName" name="name" required maxlength="120" placeholder="Enter exactly as prescribed" value="${escapeHTML(med?.name||'')}"></div>
+      <div class="field"><label for="medAmount">Dose / quantity</label><input id="medAmount" name="amount" maxlength="100" placeholder="e.g. 1 tablet, 5 ml" value="${escapeHTML(med?.amount||'')}"></div>
+      <div class="field"><label for="medAction">Instruction *</label><select id="medAction" name="action" required>${['Swallow','Eat','Apply','Drink','Inhale','Inject','Gargle / rinse','Use as directed','Other'].map(v=>`<option ${((med?.action)||'Swallow')===v?'selected':''}>${v}</option>`).join('')}</select></div>
+      <div class="field"><label for="medFrequency">Schedule *</label><select id="medFrequency" name="frequency"><option value="daily" ${(med?.frequency||'daily')==='daily'?'selected':''}>Every day</option><option value="alternate" ${med?.frequency==='alternate'?'selected':''}>Alternate days (every other day)</option><option value="weekdays" ${med?.frequency==='weekdays'?'selected':''}>Selected weekdays</option></select></div>
+      <div class="field full ${med?.frequency==='weekdays'?'':'hidden'}" id="weekdayField"><span class="group-label">Which days?</span><div class="weekday-choices">${FULL_WEEKDAYS.map((day,i)=>`<label class="weekday-choice"><input type="checkbox" name="weekdays" value="${i}" ${(weekdays.includes(i))?'checked':''}>${day.slice(0,3)}</label>`).join('')}</div></div>
+      <div class="field full"><span class="group-label">Time of day *</span><small class="muted">Pick each prescribed time and set the approximate clock time for reminders.</small><div class="slot-time-grid">${slotHtml}</div></div>
+      <div class="field"><label for="foodRelation">Meal instruction</label><select name="foodRelation" id="foodRelation"><option value="none" ${(med?.foodRelation||'after')==='none'?'selected':''}>No meal timing specified</option><option value="before" ${med?.foodRelation==='before'?'selected':''}>Before</option><option value="after" ${(med?.foodRelation||'after')==='after'?'selected':''}>After</option><option value="with" ${med?.foodRelation==='with'?'selected':''}>With</option></select></div>
+      <div class="field"><label for="meal">Meal</label><select name="meal" id="meal"><option value="breakfast" ${(med?.meal||'dinner')==='breakfast'?'selected':''}>Breakfast</option><option value="lunch" ${med?.meal==='lunch'?'selected':''}>Lunch</option><option value="dinner" ${(med?.meal||'dinner')==='dinner'?'selected':''}>Dinner</option><option value="any meal" ${med?.meal==='any meal'?'selected':''}>Any meal</option></select></div>
+      <div class="field"><label for="startDate">Start date *</label><input type="date" id="startDate" name="startDate" required value="${escapeHTML(med?.startDate||todayKey())}"></div>
+      <div class="field"><label for="durationDays">Course length (days)</label><input type="number" id="durationDays" name="durationDays" min="1" max="3650" placeholder="Leave blank for ongoing" value="${escapeHTML(med?.durationDays??'')}"><small>Calendar days, including alternate days. Blank = ongoing.</small></div>
+      <div class="field full"><label for="purchasedStatus">Have you bought this medicine? *</label><select id="purchasedStatus" name="purchased"><option value="yes" ${med?.purchased!==false?'selected':''}>Yes — available to take</option><option value="no" ${med?.purchased===false?'selected':''}>Not yet — need to buy</option></select></div>
+      <div class="field full"><label for="medPurpose">Purpose / medicine info (optional)</label><input id="medPurpose" name="purpose" maxlength="500" placeholder="Optional note from your clinician" value="${escapeHTML(med?.purpose||'')}"><small>Later, an AI helper can be connected to the info icon. For now, enter a note only if you know it.</small></div>
+      <div class="field full"><label for="medNotes">Additional prescribed instructions / notes</label><textarea id="medNotes" name="notes" maxlength="1500" placeholder="e.g. any extra directions exactly as written on the prescription">${escapeHTML(med?.notes||'')}</textarea></div>
+    </div><div class="form-error" id="formError"></div>`;
+    const freq=document.getElementById('medFrequency');
+    freq.addEventListener('change',()=>document.getElementById('weekdayField').classList.toggle('hidden',freq.value!=='weekdays'));
+    openDialog(document.getElementById('formDialog'));
+    setTimeout(()=>document.getElementById('medName')?.focus(),30);
+  }
+  function saveForm(event){
+    event.preventDefault();if(!editing)return;
+    const form=event.currentTarget;const fd=new FormData(form);const error=document.getElementById('formError');
+    if(editing.type==='doctor'){
+      const name=String(fd.get('name')||'').trim();if(!name){error.textContent='Enter a doctor name.';return;}
+      const values={name,specialty:String(fd.get('specialty')||'').trim(),followUpDate:String(fd.get('followUpDate')||''),notes:String(fd.get('notes')||'').trim()};
+      if(editing.id)Object.assign(getDoctor(editing.id),values);else state.doctors.push({id:uid(),...values});
+      const saved=persist();closeDialogs();renderApp();showToast(saved?(editing.id?'Doctor updated':'Doctor added'):'Doctor changes are visible, but the local save failed.');editing=null;return;
+    }
+    if(editing.type==='medicine'){
+      const name=String(fd.get('name')||'').trim();const doctorId=String(fd.get('doctorId')||'');const startDate=String(fd.get('startDate')||'');
+      const timeSlots=fd.getAll('timeSlots').map(String); const frequency=String(fd.get('frequency')||'daily');
+      if(!name){error.textContent='Enter the medicine name.';return;}
+      if(!getDoctor(doctorId)){error.textContent='Choose a valid doctor.';return;}
+      if(!startDate){error.textContent='Choose a start date.';return;}
+      if(!timeSlots.length){error.textContent='Select at least one time of day.';return;}
+      const weekdays=fd.getAll('weekdays').map(Number);
+      if(frequency==='weekdays'&&!weekdays.length){error.textContent='Select at least one weekday.';return;}
+      const durationRaw=String(fd.get('durationDays')||'').trim();const durationDays=durationRaw?Number(durationRaw):null;
+      if(durationDays!==null&&(!Number.isInteger(durationDays)||durationDays<1||durationDays>3650)){error.textContent='Course length must be a whole number between 1 and 3650 days.';return;}
+      const slotTimes={};for(const s of SLOTS)slotTimes[s.key]=String(fd.get('time_'+s.key)||s.defaultTime);
+      const values={doctorId,name,amount:String(fd.get('amount')||'').trim(),action:String(fd.get('action')||'Swallow'),frequency,weekdays:frequency==='weekdays'?weekdays:[],timeSlots,slotTimes,foodRelation:String(fd.get('foodRelation')||'none'),meal:String(fd.get('meal')||'dinner'),startDate,durationDays,purchased:String(fd.get('purchased')||'yes')!=='no',purpose:String(fd.get('purpose')||'').trim(),notes:String(fd.get('notes')||'').trim()};
+      if(editing.id){const existing=getMedicine(editing.id);if(existing)Object.assign(existing,values);}
+      else state.medicines.push({id:uid(),...values});
+      const saved=persist();closeDialogs();renderApp();showToast(saved?(editing.id?'Medicine updated':'Medicine added'):'Medicine changes are visible, but the local save failed.');editing=null;return;
+    }
+  }
+  function showMedicineInfo(id){
+    const med=getMedicine(id);if(!med)return;const doc=getDoctor(med.doctorId);const end=medicineEndDate(med);
+    document.getElementById('infoTitle').textContent=med.name;
+    document.getElementById('infoContent').innerHTML=`<div class="detail-info">
+      <div class="detail-info-row"><div class="detail-info-label">Prescribed by</div><div class="detail-info-value">${escapeHTML(doc?.name||'Doctor not found')}${doc?.specialty?` · ${escapeHTML(doc.specialty)}`:''}</div></div>
+      <div class="detail-info-row"><div class="detail-info-label">Instruction</div><div class="detail-info-value">${escapeHTML(instructionText(med))}</div></div>
+      <div class="detail-info-row"><div class="detail-info-label">Schedule</div><div class="detail-info-value">${escapeHTML(scheduleText(med))}<br>${escapeHTML(frequencyText(med))}</div></div>
+      <div class="detail-info-row"><div class="detail-info-label">Course</div><div class="detail-info-value">${escapeHTML(formatDate(med.startDate,{month:'short',day:'numeric',year:'numeric'}))} – ${end?escapeHTML(formatDate(end,{month:'short',day:'numeric',year:'numeric'})):'Ongoing'}</div></div>
+      <div class="detail-info-row"><div class="detail-info-label">Purpose / info</div><div class="detail-info-value">${escapeHTML(med.purpose||'No purpose note added. An AI-assisted explanation can be connected in a future version; it is not active here.')}</div></div>
+      <div class="detail-info-row"><div class="detail-info-label">Additional notes</div><div class="detail-info-value">${escapeHTML(med.notes||'None added.')}</div></div>
+      <div class="detail-info-row"><div class="detail-info-label">Availability</div><div class="detail-info-value">${med.purchased===false?'Not purchased yet':'Marked as purchased'}</div></div>
+    </div>`;
+    openDialog(document.getElementById('infoDialog'));
+  }
+  function toggleDose(medId,day,slot){
+    const med=getMedicine(medId);if(!med)return;
+    if(med.purchased===false){showToast('Mark this medicine as purchased before checking off a dose.');return;}
+    const key=logKey(medId,day,slot);
+    if(state.logs[key]?.taken)delete state.logs[key];else state.logs[key]={taken:true,at:new Date().toISOString()};
+    const saved=persist();renderApp();if(!saved)showToast('Dose updated for this session, but the local save failed.');
+  }
+  function togglePurchased(id){const med=getMedicine(id);if(!med)return;med.purchased=med.purchased===false;const saved=persist();renderApp();showToast(saved?(med.purchased?'Medicine marked as purchased':'Medicine marked as not yet purchased'):'Purchase status changed for this session, but the local save failed.');}
+  function deleteMedicine(id){const med=getMedicine(id);if(!med)return;if(!confirm(`Delete ${med.name} and its dose history? This cannot be undone unless you have a backup.`))return;
+    state.medicines=state.medicines.filter(m=>m.id!==id);Object.keys(state.logs).forEach(k=>{if(k.startsWith(id+'::'))delete state.logs[k]});const saved=persist();renderApp();showToast(saved?'Medicine deleted':'Medicine deleted in this session, but the local save failed.');}
+  function deleteDoctor(id){const doc=getDoctor(id);if(!doc)return;const meds=state.medicines.filter(m=>m.doctorId===id);if(!confirm(`Delete ${doc.name} and ${meds.length} associated medicine${meds.length===1?'':'s'}? Dose history for those medicines will also be removed.`))return;
+    const ids=meds.map(m=>m.id);state.doctors=state.doctors.filter(d=>d.id!==id);state.medicines=state.medicines.filter(m=>m.doctorId!==id);Object.keys(state.logs).forEach(k=>{if(ids.some(mid=>k.startsWith(mid+'::')))delete state.logs[k]});const saved=persist();renderApp();showToast(saved?'Doctor and associated medicines deleted':'Deletion applies to this session, but the local save failed.');}
+  function selectDate(day){selectedDate=day;calendarYear=parseDate(day).getFullYear();renderApp();}
+  function makeBackup(){
+    const blob=new Blob([JSON.stringify({format:'medi-notes-backup-v1',exportedAt:new Date().toISOString(),data:state},null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`medi-notes-backup-${todayKey()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Backup downloaded');
+  }
+  function icsEscape(value){return String(value??'').replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');}
+  function icsDateTime(date){
+    const pad=n=>String(n).padStart(2,'0');
+    return `${date.getFullYear()}${pad(date.getMonth()+1)}${pad(date.getDate())}T${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+  }
+  function icsDate(date){const pad=n=>String(n).padStart(2,'0');return `${date.getFullYear()}${pad(date.getMonth()+1)}${pad(date.getDate())}`;}
+  function icsStamp(){return new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');}
+  function addIcsAlarm(lines, description, trigger='PT0M'){
+    lines.push('BEGIN:VALARM',`TRIGGER:${trigger}`,'ACTION:DISPLAY',`DESCRIPTION:${icsEscape(description)}`,'END:VALARM');
+  }
+  function exportDeviceCalendar(){
+    const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Medi-Notes//Medication Tracker//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Medi-Notes'];
+    const stamp=icsStamp();let doseCount=0;let followupCount=0;
+    // Export the next 90 days of purchased, scheduled doses as individual local-time events.
+    for(let offset=0;offset<90;offset++){
+      const day=dateKey(addDays(parseDate(todayKey()),offset));
+      for(const dose of getScheduledDoses(day)){
+        if(dose.med.purchased===false) continue;
+        const [hour,minute]=String(dose.time||'08:00').split(':').map(Number);
+        const start=parseDate(day);start.setHours(hour||0,minute||0,0,0);
+        const end=new Date(start.getTime()+15*60*1000);
+        const summary=`Medi-Notes: ${dose.med.name} (${formatSlot(dose.slot)})`;
+        const description=[
+          `Doctor: ${dose.doctor?.name||'Not specified'}`,
+          `Medicine: ${dose.med.name}`,
+          `Instructions: ${instructionText(dose.med)}`,
+          `Schedule: ${frequencyText(dose.med)}`,
+          dose.med.notes?`Notes: ${dose.med.notes}`:'',
+          'Calendar entry exported from Medi-Notes. Follow the current prescription instructions.'
+        ].filter(Boolean).join('\n');
+        lines.push('BEGIN:VEVENT',`UID:dose-${dose.med.id}-${day}-${dose.slot}@medi-notes.local`,`DTSTAMP:${stamp}`,`DTSTART:${icsDateTime(start)}`,`DTEND:${icsDateTime(end)}`,`SUMMARY:${icsEscape(summary)}`,`DESCRIPTION:${icsEscape(description)}`);
+        addIcsAlarm(lines,`Scheduled dose: ${dose.med.name}`,'PT0M');
+        lines.push('END:VEVENT');doseCount++;
+      }
+    }
+    // Doctor follow-ups are all-day events with a one-day-before reminder.
+    for(const doctor of state.doctors){
+      if(!doctor.followUpDate || doctor.followUpDate<todayKey()) continue;
+      const start=parseDate(doctor.followUpDate);const end=addDays(start,1);
+      const summary=`Doctor follow-up: ${doctor.name}`;
+      const description=[doctor.specialty?`Specialty: ${doctor.specialty}`:'',doctor.notes?`Notes: ${doctor.notes}`:'','Appointment recorded in Medi-Notes.'].filter(Boolean).join('\n');
+      lines.push('BEGIN:VEVENT',`UID:followup-${doctor.id}-${doctor.followUpDate}@medi-notes.local`,`DTSTAMP:${stamp}`,`DTSTART;VALUE=DATE:${icsDate(start)}`,`DTEND;VALUE=DATE:${icsDate(end)}`,`SUMMARY:${icsEscape(summary)}`,`DESCRIPTION:${icsEscape(description)}`);
+      addIcsAlarm(lines,`Upcoming doctor follow-up: ${doctor.name}`,'-P1D');
+      lines.push('END:VEVENT');followupCount++;
+    }
+    lines.push('END:VCALENDAR');
+    if(!doseCount&&!followupCount){showToast('No upcoming doses or follow-ups to export');return;}
+    const blob=new Blob([lines.join('\r\n')+'\r\n'],{type:'text/calendar;charset=utf-8'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`medi-notes-calendar-${todayKey()}.ics`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    showToast(`Calendar file created: ${doseCount} dose events, ${followupCount} follow-ups. Import it into your calendar app.`);
+  }
+  function importBackup(file){
+    const reader=new FileReader();reader.onload=()=>{try{
+      const parsed=JSON.parse(reader.result);const next=parsed.data||parsed;
+      if(!Array.isArray(next.doctors)||!Array.isArray(next.medicines)||!next.logs||typeof next.logs!=='object')throw new Error('This does not look like a Medi-Notes backup.');
+      if(!confirm(`Import ${next.doctors.length} doctors and ${next.medicines.length} medicines? This replaces current local data.`))return;
+      state={doctors:next.doctors,medicines:next.medicines,logs:next.logs};const saved=persist();renderApp();showToast(saved?'Backup imported':'Backup loaded for this session, but it could not be saved locally.');
+    }catch(err){alert(err.message||'Could not read this backup file.');}};reader.readAsText(file);
+  }
+  function checkReminders(){
+    if(reminderShownThisSession)return;
+    const now=new Date();const today=todayKey();const overdue=getScheduledDoses(today).filter(d=>d.med.purchased!==false&&!isTaken(d.med.id,today,d.slot)&&doseIsOverdue(d,now));
+    if(!overdue.length)return;
+    reminderShownThisSession=true;
+    const grouped=[];for(const d of overdue){const key=d.med.id+'::'+d.slot;if(!grouped.some(g=>g.key===key))grouped.push({key,med:d.med,slot:d.slot,time:d.time,doctor:d.doctor});}
+    document.getElementById('reminderList').innerHTML=grouped.map(d=>`<div class="reminder-item"><div><strong>${escapeHTML(d.med.name)} · ${escapeHTML(formatSlot(d.slot))}</strong><small>${escapeHTML(d.doctor?.name||'')} · scheduled ${escapeHTML(formatTime(d.time))}</small></div><button class="btn btn-small btn-primary" data-action="reminder-taken" data-med-id="${escapeHTML(d.med.id)}" data-slot="${escapeHTML(d.slot)}">Mark taken</button></div>`).join('');
+    openDialog(document.getElementById('reminderDialog'));
+  }
+  document.addEventListener('click',event=>{
+    const close=event.target.closest('[data-close-dialog]');if(close){closeDialogs();return;}
+    if(event.target.closest('[data-close-reminder]')){document.getElementById('reminderDialog').close();return;}
+    const btn=event.target.closest('[data-action]');if(!btn)return;
+    const action=btn.dataset.action;const id=btn.dataset.id;
+    if(action==='add-doctor')openDoctorForm();
+    else if(action==='add-med')openMedicineForm();
+    else if(action==='add-med-for-doctor')openMedicineForm(null,id);
+    else if(action==='edit-doctor')openDoctorForm(id);
+    else if(action==='edit-med')openMedicineForm(id);
+    else if(action==='delete-doctor')deleteDoctor(id);
+    else if(action==='delete-med')deleteMedicine(id);
+    else if(action==='toggle-purchased')togglePurchased(id);
+    else if(action==='info-med')showMedicineInfo(id);
+    else if(action==='select-date')selectDate(btn.dataset.date);
+    else if(action==='reminder-taken'){toggleDose(btn.dataset.medId,todayKey(),btn.dataset.slot);if(document.getElementById('reminderDialog').open)checkReminderDialogEmpty();}
+  });
+  function checkReminderDialogEmpty(){
+    const today=todayKey();const remaining=getScheduledDoses(today).filter(d=>d.med.purchased!==false&&!isTaken(d.med.id,today,d.slot)&&doseIsOverdue(d));
+    if(!remaining.length){document.getElementById('reminderDialog').close();showToast('Pending reminders cleared');}
+    else {
+      document.getElementById('reminderList').innerHTML=remaining.map(d=>`<div class="reminder-item"><div><strong>${escapeHTML(d.med.name)} · ${escapeHTML(formatSlot(d.slot))}</strong><small>${escapeHTML(d.doctor?.name||'')} · scheduled ${escapeHTML(formatTime(d.time))}</small></div><button class="btn btn-small btn-primary" data-action="reminder-taken" data-med-id="${escapeHTML(d.med.id)}" data-slot="${escapeHTML(d.slot)}">Mark taken</button></div>`).join('');
+    }
+  }
+  document.getElementById('mainForm').addEventListener('submit',saveForm);
+  document.getElementById('addDoctorBtn').addEventListener('click',()=>openDoctorForm());
+  document.getElementById('panelAddDoctorBtn').addEventListener('click',()=>openDoctorForm());
+  document.getElementById('addMedicineBtn').addEventListener('click',()=>openMedicineForm());
+  document.getElementById('jumpTodayBtn').addEventListener('click',()=>selectDate(todayKey()));
+  document.getElementById('jumpSelectedTodayBtn').addEventListener('click',()=>selectDate(todayKey()));
+  document.getElementById('deviceCalendarBtn').addEventListener('click',exportDeviceCalendar);
+  document.getElementById('prevYearBtn').addEventListener('click',()=>{calendarYear--;selectedDate=`${calendarYear}-01-01`;renderApp();});
+  document.getElementById('nextYearBtn').addEventListener('click',()=>{calendarYear++;selectedDate=`${calendarYear}-01-01`;renderApp();});
+  document.getElementById('manageFollowupsBtn').addEventListener('click',()=>document.getElementById('doctorsHeading').scrollIntoView({behavior:'smooth',block:'start'}));
+  document.getElementById('exportBtn').addEventListener('click',makeBackup);
+  document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change',event=>{const file=event.target.files?.[0];if(file)importBackup(file);event.target.value='';});
+  document.getElementById('resetBtn').addEventListener('click',()=>{if(confirm('Clear all Medi-Notes data saved in this browser? Export a backup first if you want to keep it.')){state=freshState();const saved=persist();try{localStorage.removeItem(LEGACY_STORAGE_KEY);}catch{}renderApp();showToast(saved?'Local data cleared':'The page was cleared, but browser storage could not be updated.');}});
+  document.getElementById('doctorList').addEventListener('click',event=>{if(event.target.id==='emptyAddDoctor')openDoctorForm();});
+  // Checkbox tracking is delegated here so rerendering the date view does not leave stale listeners.
+  document.addEventListener('change',event=>{const input=event.target.closest('input[data-action="toggle-dose"]');if(input)toggleDose(input.dataset.medId,input.dataset.date,input.dataset.slot);});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')document.querySelectorAll('dialog[open]').forEach(d=>d.close());});
+
+  renderApp();
+  // Ask the browser to reduce automatic eviction where persistent storage is supported. This is not a backup guarantee.
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+  // The requested reminder is checked on app open. A browser-only version cannot notify while closed.
+  checkReminders();
+})();
+</script>
+</body>
+</html>
