@@ -45,7 +45,7 @@
   .save-pill{display:inline-flex;gap:6px;align-items:center;color:var(--green);font-weight:600;font-size:12px;background:#dafbe1;border:1px solid #aceebb;padding:5px 9px;border-radius:999px;white-space:nowrap}
   .save-pill.save-error{color:var(--red);background:var(--red-bg);border-color:#ffb4ae}
   .workspace-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:16px;align-items:start}
-  .workspace-grid>.panel{height:clamp(325px, calc(100vh - 380px), 420px);display:flex;flex-direction:column;min-height:0}
+  .workspace-grid>.panel{height:clamp(343px, calc(100vh - 362px), 438px);display:flex;flex-direction:column;min-height:0}
   .workspace-grid>.panel>.panel-header{flex-shrink:0}
   .workspace-grid>.panel>.panel-body{flex:1;min-height:0;overflow:auto}
   .tracker-panel>.panel-body{display:flex;flex-direction:column;overflow:hidden}
@@ -95,9 +95,9 @@
   .buy-toggle{font-size:10px;padding:4px 6px;border-radius:6px;border:1px solid var(--orange-border);color:var(--orange);background:var(--orange-bg);white-space:nowrap}
   .buy-toggle.bought{color:var(--green);border-color:#aceebb;background:var(--green-bg)}
   .tracker-panel{min-height:230px}
-  .tracker-list{display:grid;gap:11px}
+  .tracker-list{display:grid;gap:7px}
   .tracker-doctor-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--border);padding-bottom:5px;margin-top:3px}
-  .dose-card{border:1px solid var(--border);border-radius:9px;padding:11px 12px}
+  .dose-card{border:1px solid var(--border);border-radius:9px;padding:7px 9px}
   .dose-main-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px}
   .dose-card-top{display:flex;justify-content:flex-start;align-items:flex-start;gap:8px;min-width:0}
   .dose-main-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0}
@@ -201,6 +201,49 @@
   .dose-main-row .dose-chips{margin-top:0;gap:5px;justify-content:flex-end;align-items:center}
   .dose-main-row .dose-chip{padding:4px 6px;font-size:10px;white-space:nowrap}
   @media(max-width:850px){.dose-main-row .dose-chips{justify-content:flex-start}}
+  /* Dose card: medicine, instruction panel and dose controls are visibly separated. */
+  .dose-main-row{grid-template-columns:minmax(92px,.82fr) minmax(130px,1fr) minmax(160px,1.25fr);align-items:stretch;gap:10px}
+  .dose-medicine-summary{min-width:0;display:flex;flex-direction:column;justify-content:center;gap:5px}
+  .dose-doctor-meta{font-size:10px;color:var(--subtle);line-height:1.3;overflow-wrap:anywhere}
+  .dose-instruction-panel{min-width:0;align-self:stretch;display:flex;flex-direction:column;justify-content:center;gap:5px;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+  .dose-instruction-label{font-size:9px;letter-spacing:.45px;text-transform:uppercase;font-weight:800;color:var(--muted)}
+  .dose-instruction{font-size:11px;color:var(--text);margin:0;line-height:1.35;overflow-wrap:anywhere}
+  .dose-custom-instruction{font-size:11px;line-height:1.35;color:var(--muted);padding-top:5px;border-top:1px dashed var(--border);white-space:pre-wrap;overflow-wrap:anywhere}
+  .dose-custom-btn{align-self:flex-start;font-size:10px;padding:3px 5px;white-space:normal;text-align:left}
+  .dose-main-actions{min-width:0;display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+  .dose-main-row .dose-chips{margin:0;gap:5px;justify-content:flex-end;align-items:center}
+  .dose-main-row .dose-chip{padding:4px 6px;font-size:10px;white-space:normal}
+  .dose-main-row .dose-chip label{flex-wrap:wrap;justify-content:center}
+  @media(max-width:640px){.dose-main-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.dose-medicine-summary,.dose-instruction-panel{min-width:0}.dose-main-actions{grid-column:1/-1;justify-content:space-between;align-items:center}.dose-main-row .dose-chips{justify-content:flex-start}.dose-main-row .dose-chip{white-space:nowrap}}
+  @media(max-width:420px){.dose-main-row{grid-template-columns:minmax(0,1fr)}.dose-main-actions{grid-column:auto;justify-content:space-between}.dose-instruction-panel{border-left-width:3px}}
+
+  /* Compact dashboard refinement: reclaim calendar-header height for the dose/doctor panels. */
+  .calendar-panel>.panel-header{padding:8px 15px;min-height:0}
+  .calendar-heading-group{display:flex;align-items:baseline;gap:12px;min-width:0;flex-wrap:wrap}
+  .calendar-heading-description{margin:0!important;font-size:11px!important;line-height:1.25;color:var(--muted);white-space:nowrap}
+  .dose-card{padding:7px 9px}
+  .tracker-list{gap:7px}
+  .dose-main-row{gap:7px}
+  .dose-medicine-summary{gap:3px}
+  .dose-instruction-panel{padding:5px 8px;gap:3px}
+  .dose-custom-instruction{padding-top:3px}
+  .dose-custom-btn{padding:2px 4px;line-height:1.2}
+  .dose-main-row .dose-chips{gap:4px}
+  .dose-main-row .dose-chip{padding:3px 5px}
+  .dose-main-actions{gap:5px}
+  @media(max-width:850px){
+    .calendar-panel>.panel-header{padding:10px 12px}
+    .calendar-heading-group{flex-direction:column;align-items:flex-start;gap:1px}
+    .calendar-heading-description{white-space:normal}
+    .workspace-grid>.panel{height:460px}
+  }
+  @media(max-width:640px){
+    .calendar-panel>.panel-header{padding:12px}
+    .workspace-grid>.panel{height:430px}
+    .dose-card{padding:7px}
+    .dose-instruction-panel{padding:6px 8px}
+  }
+
 </style>
 </head>
 <body>
@@ -239,7 +282,7 @@
   </div>
   <section class="panel calendar-panel" aria-labelledby="calendarHeading">
     <div class="panel-header">
-      <div><div class="section-title"><h2 id="calendarHeading">Adherence calendar</h2></div><p>Explore your medication adherence history by date.</p></div>
+      <div class="calendar-heading-group"><div class="section-title"><h2 id="calendarHeading">Adherence calendar</h2></div><p class="calendar-heading-description">Explore your medication adherence history by date.</p></div>
       <div class="calendar-header-actions"><button class="btn btn-small" id="deviceCalendarBtn" title="Download upcoming doses and follow-ups as an .ics file for your device calendar">↗ Device calendar</button><button class="icon-btn" id="prevYearBtn" aria-label="Previous year" title="Previous year">‹</button><span class="year-label" id="calendarYear"></span><button class="icon-btn" id="nextYearBtn" aria-label="Next year" title="Next year">›</button></div>
     </div>
     <div class="calendar-body">
@@ -265,6 +308,7 @@
 </main>
 <dialog id="formDialog" aria-labelledby="formTitle"><form id="mainForm"><div class="dialog-head"><h2 id="formTitle">Add item</h2><button class="icon-btn" type="button" data-close-dialog aria-label="Close">×</button></div><div class="dialog-content" id="formContent"></div><div class="dialog-footer"><span class="tiny muted">Fields marked * are required.</span><div style="display:flex;gap:7px"><button type="button" class="btn" data-close-dialog>Cancel</button><button type="submit" class="btn btn-primary" id="formSubmitBtn">Save</button></div></div></form></dialog>
 <dialog id="infoDialog"><div class="dialog-head"><h2 id="infoTitle">Medicine details</h2><button class="icon-btn" type="button" data-close-dialog aria-label="Close">×</button></div><div class="dialog-content" id="infoContent"></div><div class="dialog-footer"><span class="tiny muted">AI explanations are not connected yet.</span><button class="btn" type="button" data-close-dialog>Close</button></div></dialog>
+<dialog id="customInstructionDialog" aria-labelledby="customInstructionTitle"><form id="customInstructionForm"><div class="dialog-head"><div><h2 id="customInstructionTitle">Custom instruction</h2><div class="tiny muted" style="margin-top:3px">Add a medicine-specific instruction for Today’s doses.</div></div><button class="icon-btn" type="button" data-close-dialog aria-label="Close">×</button></div><div class="dialog-content"><div class="field"><label for="customInstructionInput">Custom instruction</label><textarea id="customInstructionInput" maxlength="1000" rows="4" placeholder="e.g. Take with a full glass of water, or follow another instruction exactly as prescribed."></textarea><small>Leave the field blank and save to remove an existing custom instruction. Follow the clinician’s or pharmacist’s directions.</small></div></div><div class="dialog-footer"><button type="button" class="btn btn-danger" id="clearCustomInstructionBtn">Clear text</button><div style="display:flex;gap:7px"><button type="button" class="btn" data-close-dialog>Cancel</button><button type="submit" class="btn btn-primary">Save instruction</button></div></div></form></dialog>
 <dialog id="reminderDialog"><div class="dialog-head"><div><h2>💊 Your pending meds</h2><div class="tiny muted" style="margin-top:3px">These scheduled doses are 2+ hours overdue.</div></div><button class="icon-btn" type="button" data-close-reminder aria-label="Close">×</button></div><div class="dialog-content"><div id="reminderList" class="reminder-list"></div><p class="tiny muted" style="margin:12px 0 0">Check your prescription instructions before taking a dose late or making up a missed dose.</p></div><div class="dialog-footer"><span class="tiny muted">Reminder only — not medical advice.</span><button class="btn" type="button" data-close-reminder>Not now</button></div></dialog>
 <dialog id="followupDialog" aria-labelledby="followupDialogTitle"><form id="followupForm"><div class="dialog-head"><h2 id="followupDialogTitle">Create follow-up</h2><button class="icon-btn" type="button" data-close-dialog aria-label="Close">×</button></div><div class="dialog-content"><div class="form-grid"><div class="field full"><label for="followupDoctorSelect">Doctor *</label><select id="followupDoctorSelect" name="doctorId" required></select></div><div class="field full"><label for="followupDateInput">Follow-up date *</label><input id="followupDateInput" name="followUpDate" type="date" required><small>Doctor names appear on the adherence calendar only when you select a date with a scheduled follow-up.</small></div></div><div class="form-error" id="followupFormError"></div></div><div class="dialog-footer"><button type="button" class="btn btn-danger" id="clearFollowupBtn">Clear follow-up</button><div style="display:flex;gap:7px"><button type="button" class="btn" data-close-dialog>Cancel</button><button type="submit" class="btn btn-primary">Save follow-up</button></div></div></form></dialog>
 <dialog id="tutorialDialog" aria-labelledby="tutorialTitle"><div class="dialog-head"><div><h2 id="tutorialTitle">Welcome to Medi-Notes</h2><div class="tutorial-step-count" id="tutorialStepCount">Step 1 of 6</div></div><button class="icon-btn" type="button" id="closeTutorialBtn" aria-label="Close tutorial">×</button></div><div class="dialog-content tutorial-content"><h3 id="tutorialStepHeading">Your dashboard</h3><p id="tutorialStepText" style="margin:9px 0 0"></p></div><div class="dialog-footer"><button type="button" class="btn" id="tutorialBackBtn">← Back</button><div style="display:flex;gap:7px"><button type="button" class="btn" id="tutorialSkipBtn">Skip tour</button><button type="button" class="btn btn-primary" id="tutorialNextBtn">Next →</button></div></div></dialog>
@@ -309,6 +353,7 @@
   let toastTimer;
   let tutorialStep = 0;
   let tutorialTimer = null;
+  let customInstructionMedId = null;
 
   function freshState(){ return {doctors:[],medicines:[],logs:{}}; }
   function setSaveStatus(message, failed=false){
@@ -456,29 +501,34 @@
   function renderTracker(container, day){
     const doses=getScheduledDoses(day);
     if(!doses.length){
-      container.innerHTML=`<div class="empty-state"><div class="empty-icon">☑</div><strong>No medicines scheduled</strong><p>${day===todayKey()?'Add medicines in the Doctors & medicines section to see their checkboxes here.':'There are no active medicine schedules for this date.'}</p></div>`;
+      container.innerHTML=`<div class="empty-state"><div class="empty-icon">☑</div><strong>No medicines scheduled</strong><p>${day===todayKey()?'Add medicines in the Doctors & medicines section to see their checkboxes here automatically.':'There are no active medicine schedules for this date.'}</p></div>`;
       return {total:0,taken:0};
     }
-    const doctorOrder=[];
-    for(const dose of doses){ const key=dose.doctor?.id||'no-doctor'; if(!doctorOrder.includes(key)) doctorOrder.push(key); }
+    const byMedicine=new Map();
+    for(const dose of doses){
+      if(!byMedicine.has(dose.med.id))byMedicine.set(dose.med.id,{med:dose.med,doctor:dose.doctor,doses:[]});
+      byMedicine.get(dose.med.id).doses.push(dose);
+    }
+    const groups=[...byMedicine.values()];
+    for(const group of groups)group.doses.sort((a,b)=>a.time.localeCompare(b.time)||a.slot.localeCompare(b.slot));
+    groups.sort((a,b)=>Number(a.med.purchased===false)-Number(b.med.purchased===false)||a.doses[0].time.localeCompare(b.doses[0].time)||a.med.name.localeCompare(b.med.name));
     let total=0,taken=0;
-    container.innerHTML=doctorOrder.map(docId=>{
-      const docDoses=doses.filter(d=>(d.doctor?.id||'no-doctor')===docId);
-      const doc=docDoses[0]?.doctor;
-      const byMed=[];
-      for(const dose of docDoses){let group=byMed.find(g=>g.med.id===dose.med.id);if(!group){group={med:dose.med,doses:[]};byMed.push(group)}group.doses.push(dose)}
-      return `<div class="tracker-list">${doc?`<div class="tracker-doctor-label">${escapeHTML(doc.name)}</div>`:`<div class="tracker-doctor-label">Doctor not found</div>`}${byMed.map(group=>{
-        const med=group.med;
-        const slots=group.doses.map(d=>{
-          const didTake=isTaken(med.id,day,d.slot); const overdue=day<=todayKey() && !didTake && med.purchased!==false && (day<todayKey() || (day===todayKey() && doseIsOverdue(d)));
-          total++; if(didTake) taken++;
-          const label=`${formatSlot(d.slot)} · ${formatTime(d.time)}`;
-          return `<span class="dose-chip ${didTake?'done':overdue?'late':''}"><label><input type="checkbox" data-action="toggle-dose" data-med-id="${escapeHTML(med.id)}" data-date="${escapeHTML(day)}" data-slot="${escapeHTML(d.slot)}" ${didTake?'checked':''} ${(med.purchased===false || day>todayKey())?'disabled':''} aria-label="Mark ${escapeHTML(med.name)} ${escapeHTML(formatSlot(d.slot))} as taken on ${escapeHTML(day)}">${escapeHTML(label)}${didTake?' ✓':overdue?' · overdue':''}</label></span>`;
-        }).join('');
-        const purchase=med.purchased===false?`<div class="needs-buy-box"><span>⚠ Not purchased yet — check off doses after you have the medicine.</span><button class="btn btn-small" data-action="toggle-purchased" data-id="${escapeHTML(med.id)}">Mark purchased</button></div>`:'';
-        return `<div class="dose-card"><div class="dose-main-row"><div class="dose-card-top"><div><div class="dose-card-name">${escapeHTML(med.name)}${med.amount?` <span class="medicine-dose">· ${escapeHTML(med.amount)}</span>`:''}</div><div class="dose-instruction">${escapeHTML(instructionText(med))}</div></div></div><div class="dose-main-actions"><div class="dose-chips">${slots}</div><button class="icon-btn" data-action="info-med" data-id="${escapeHTML(med.id)}" title="Medicine notes / purpose" aria-label="Medicine details for ${escapeHTML(med.name)}">i</button></div></div>${purchase}</div>`;
-      }).join('')}</div>`;
-    }).join('');
+    container.innerHTML=`<div class="tracker-list">${groups.map(group=>{
+      const med=group.med, doc=group.doctor;
+      const slots=group.doses.map(d=>{
+        const didTake=isTaken(med.id,day,d.slot); const overdue=day<=todayKey() && !didTake && med.purchased!==false && (day<todayKey() || (day===todayKey() && doseIsOverdue(d)));
+        total++; if(didTake)taken++;
+        const label=`${formatSlot(d.slot)} · ${formatTime(d.time)}`;
+        return `<span class="dose-chip ${didTake?'done':overdue?'late':''}"><label><input type="checkbox" data-action="toggle-dose" data-med-id="${escapeHTML(med.id)}" data-date="${escapeHTML(day)}" data-slot="${escapeHTML(d.slot)}" ${didTake?'checked':''} ${(med.purchased===false || day>todayKey())?'disabled':''} aria-label="Mark ${escapeHTML(med.name)} ${escapeHTML(formatSlot(d.slot))} as taken on ${escapeHTML(day)}">${escapeHTML(label)}${didTake?' ✓':overdue?' · overdue':''}</label></span>`;
+      }).join('');
+      const purchase=med.purchased===false?`<div class="needs-buy-box"><span>⚠ Not purchased yet — check off doses after you have the medicine.</span><button class="btn btn-small" data-action="toggle-purchased" data-id="${escapeHTML(med.id)}">Mark purchased</button></div>`:'';
+      const customInstruction=String(med.customInstruction||'').trim();
+      return `<div class="dose-card"><div class="dose-main-row">
+        <div class="dose-medicine-summary"><div class="dose-card-name">${escapeHTML(med.name)}${med.amount?` <span class="medicine-dose">· ${escapeHTML(med.amount)}</span>`:''}</div><div class="dose-doctor-meta">${escapeHTML(doc?.name||'Doctor not specified')}</div></div>
+        <div class="dose-instruction-panel"><div class="dose-instruction-label">Instructions &amp; meal</div><div class="dose-instruction">${escapeHTML(instructionText(med))}</div>${customInstruction?`<div class="dose-custom-instruction">${escapeHTML(customInstruction)}</div>`:''}<button type="button" class="btn btn-quiet dose-custom-btn" data-action="edit-custom-instruction" data-id="${escapeHTML(med.id)}">${customInstruction?'✎ Edit custom instruction':'＋ Add custom instruction'}</button></div>
+        <div class="dose-main-actions"><div class="dose-chips">${slots}</div><button class="icon-btn" data-action="info-med" data-id="${escapeHTML(med.id)}" title="Medicine notes / purpose" aria-label="Medicine details for ${escapeHTML(med.name)}">i</button></div>
+      </div>${purchase}</div>`;
+    }).join('')}</div>`;
     return {total,taken};
   }
   function renderHeatmap(){
@@ -627,6 +677,12 @@
     if(med)document.getElementById('removeMedicineFromFormBtn').addEventListener('click',()=>deleteMedicine(med.id));
     const freq=document.getElementById('medFrequency');
     freq.addEventListener('change',()=>document.getElementById('weekdayField').classList.toggle('hidden',freq.value!=='weekdays'));
+    const mealForSlot={morning:'breakfast',afternoon:'lunch',night:'dinner'};
+    const mealSelect=document.getElementById('meal');
+    document.querySelectorAll('#formContent input[name="timeSlots"]').forEach(input=>input.addEventListener('change',()=>{
+      if(input.checked&&mealForSlot[input.value])mealSelect.value=mealForSlot[input.value];
+    }));
+    if(!med){const initialSlot=slots.find(slot=>mealForSlot[slot]);if(initialSlot)mealSelect.value=mealForSlot[initialSlot];}
     openDialog(document.getElementById('formDialog'));
     setTimeout(()=>document.getElementById('medName')?.focus(),30);
   }
@@ -663,6 +719,7 @@
     document.getElementById('infoContent').innerHTML=`<div class="detail-info">
       <div class="detail-info-row"><div class="detail-info-label">Prescribed by</div><div class="detail-info-value">${escapeHTML(doc?.name||'Doctor not found')}${doc?.specialty?` · ${escapeHTML(doc.specialty)}`:''}</div></div>
       <div class="detail-info-row"><div class="detail-info-label">Instruction</div><div class="detail-info-value">${escapeHTML(instructionText(med))}</div></div>
+      <div class="detail-info-row"><div class="detail-info-label">Custom instruction</div><div class="detail-info-value">${escapeHTML(med.customInstruction||'None added.')}</div></div>
       <div class="detail-info-row"><div class="detail-info-label">Schedule</div><div class="detail-info-value">${escapeHTML(scheduleText(med))}<br>${escapeHTML(frequencyText(med))}</div></div>
       <div class="detail-info-row"><div class="detail-info-label">Course</div><div class="detail-info-value">${escapeHTML(formatDate(med.startDate,{month:'short',day:'numeric',year:'numeric'}))} – ${end?escapeHTML(formatDate(end,{month:'short',day:'numeric',year:'numeric'})):'Ongoing'}</div></div>
       <div class="detail-info-row"><div class="detail-info-label">Purpose / info</div><div class="detail-info-value">${escapeHTML(med.purpose||'No purpose note added. An AI-assisted explanation can be connected in a future version; it is not active here.')}</div></div>
@@ -671,6 +728,23 @@
     </div>`;
     openDialog(document.getElementById('infoDialog'));
   }
+  function openCustomInstructionForm(id){
+    const med=getMedicine(id);if(!med)return;
+    customInstructionMedId=id;
+    document.getElementById('customInstructionTitle').textContent=`Custom instruction · ${med.name}`;
+    document.getElementById('customInstructionInput').value=String(med.customInstruction||'');
+    openDialog(document.getElementById('customInstructionDialog'));
+    setTimeout(()=>document.getElementById('customInstructionInput')?.focus(),30);
+  }
+  function saveCustomInstruction(event){
+    event.preventDefault();
+    const med=getMedicine(customInstructionMedId);if(!med)return;
+    med.customInstruction=String(document.getElementById('customInstructionInput').value||'').trim();
+    if(!med.customInstruction)delete med.customInstruction;
+    const saved=persist();closeDialogs();renderApp();customInstructionMedId=null;
+    showToast(saved?'Custom instruction saved':'Instruction changed for this session, but the local save failed.');
+  }
+  function clearCustomInstruction(){document.getElementById('customInstructionInput').value='';document.getElementById('customInstructionInput').focus();}
   function toggleDose(medId,day,slot){
     const med=getMedicine(medId);if(!med)return;
     if(med.purchased===false){showToast('Mark this medicine as purchased before checking off a dose.');return;}
@@ -714,6 +788,7 @@
           `Doctor: ${dose.doctor?.name||'Not specified'}`,
           `Medicine: ${dose.med.name}`,
           `Instructions: ${instructionText(dose.med)}`,
+          dose.med.customInstruction?`Custom instruction: ${dose.med.customInstruction}`:'',
           `Schedule: ${frequencyText(dose.med)}`,
           dose.med.notes?`Notes: ${dose.med.notes}`:'',
           'Calendar entry exported from Medi-Notes. Follow the current prescription instructions.'
@@ -771,6 +846,7 @@
     else if(action==='toggle-doctor-meds'){const list=document.getElementById(`doctor-meds-${id}`);if(list){const opening=list.classList.contains('collapsed');list.classList.toggle('collapsed',!opening);btn.setAttribute('aria-expanded',String(opening));btn.textContent=opening?'⌃':'⌄';btn.title=`${opening?'Hide':'Show'} medicines for ${getDoctor(id)?.name||'doctor'}`;}}
     else if(action==='toggle-purchased')togglePurchased(id);
     else if(action==='info-med')showMedicineInfo(id);
+    else if(action==='edit-custom-instruction')openCustomInstructionForm(id);
     else if(action==='select-date')selectDate(btn.dataset.date);
     else if(action==='reminder-taken'){toggleDose(btn.dataset.medId,todayKey(),btn.dataset.slot);if(document.getElementById('reminderDialog').open)checkReminderDialogEmpty();}
   });
@@ -782,6 +858,8 @@
     }
   }
   document.getElementById('mainForm').addEventListener('submit',saveForm);
+  document.getElementById('customInstructionForm').addEventListener('submit',saveCustomInstruction);
+  document.getElementById('clearCustomInstructionBtn').addEventListener('click',clearCustomInstruction);
   document.getElementById('addDoctorBtn').addEventListener('click',()=>openDoctorForm());
   document.getElementById('panelAddDoctorBtn').addEventListener('click',()=>openDoctorForm());
   document.getElementById('addMedicineBtn').addEventListener('click',()=>openMedicineForm());
